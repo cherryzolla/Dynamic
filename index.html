@@ -6,21 +6,38 @@
     <title>My Life Planner 🌸</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
+
     <div id="auth-page" class="auth-page">
         <div class="auth-box">
-            <h1 style="color: #ff8fb1">🌸 Welcome</h1>
-            <input type="text" id="userName" placeholder="Your Name">
+            <h1 id="auth-title" style="color: #ff8fb1">🌸 Login</h1>
+            
+            <div id="name-field" style="display:none;">
+                <input type="text" id="userName" placeholder="Your Name">
+            </div>
+
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="pass" placeholder="Password">
-            <div style="margin-top:10px;">
+            
+            <div id="login-actions" style="margin-top:10px;">
                 <button onclick="login()" class="bubbly-btn">Login</button>
-                <button onclick="register()" class="bubbly-btn" style="background: #e0f2f1; color: #4db6ac;">Join</button>
+                <p style="font-size: 12px; cursor: pointer; color: #888; margin-top: 15px;" onclick="toggleAuth('register')">
+                    New here? Join the club! ✨
+                </p>
+            </div>
+
+            <div id="register-actions" style="display:none; margin-top:10px;">
+                <button onclick="register()" class="bubbly-btn" style="background: #e0f2f1; color: #4db6ac;">Create Account</button>
+                <p style="font-size: 12px; cursor: pointer; color: #888; margin-top: 15px;" onclick="toggleAuth('login')">
+                    Already have an account? Login! 🌸
+                </p>
             </div>
         </div>
     </div>
@@ -31,23 +48,30 @@
             <button onclick="show('dump')">🌪️</button>
             <button onclick="logout()">👋</button>
         </div>
+
         <div id="home" class="page active">
             <div class="card">
-                <h3>✅ To-Do List</h3>
+                <h3 id="welcome-msg">Welcome back! 🌸</h3>
+                <p style="font-size: 13px; color: #999;">Manage your 7 classes & goals</p>
+                <hr style="border: 1px solid #fff5f8; margin: 15px 0;">
+                
                 <input type="text" id="todoIn" placeholder="New task..." style="width:70%">
                 <button onclick="addTodo()" class="bubbly-btn">Add</button>
                 <div id="todo-list" style="margin-top:15px;"></div>
             </div>
         </div>
+
         <div id="dump" class="page">
             <div class="card">
                 <h3>🌪️ THE DUMP</h3>
-                <textarea id="dumpIn"></textarea>
-                <button onclick="addDump()" class="bubbly-btn">Dump It!</button>
-                <div id="dump-list"></div>
+                <p style="font-size: 12px; color: #888;">Song lyrics, food blog ideas, and school rants.</p>
+                <textarea id="dumpIn" placeholder="Start typing..."></textarea>
+                <button onclick="addDump()" class="bubbly-btn" style="width: 100%;">Save to Archive</button>
+                <div id="dump-list" style="margin-top: 20px;"></div>
             </div>
         </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>

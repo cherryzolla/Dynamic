@@ -9,76 +9,88 @@ const firebaseConfig = {
   measurementId: "G-9KWEJYE88T"
 };
 
-// Initialize Firebase
+
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+function toggleAuth(mode) {
+    const nameField = document.getElementById('name-field');
+    const loginActions = document.getElementById('login-actions');
+    const registerActions = document.getElementById('register-actions');
+    const title = document.getElementById('auth-title');
+
+    if (mode === 'register') {
+        nameField.style.display = 'block';
+        registerActions.style.display = 'block';
+        loginActions.style.display = 'none';
+        title.innerText = "🌸 Join Us";
+    } else {
+        nameField.style.display = 'none';
+        registerActions.style.display = 'none';
+        loginActions.style.display = 'block';
+        title.innerText = "🌸 Login";
+    }
+}
 
 function register() {
     const name = document.getElementById('userName').value;
     const email = document.getElementById('email').value.trim();
     const pass = document.getElementById('pass').value;
 
-    if(!name) return alert("Please enter your name! ✨");
+    if(!name || !email || !pass) return alert("Please fill out everything! ✨");
 
-    firebase.auth().createUserWithEmailAndPassword(email, pass)
+    auth.createUserWithEmailAndPassword(email, pass)
         .then((userCredential) => {
-            // This saves your name to your private folder in Firestore
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            // Save the user's name to Firestore
             return db.collection("users").doc(userCredential.user.uid).set({
                 displayName: name,
-                joinedDate: new Date()
+                created: new Date()
             });
         })
         .then(() => enterApp())
         .catch(err => alert(err.message));
 }
 
+
 function login() {
-    const e = document.getElementById('email').value;
-    const p = document.getElementById('pass').value;
-    firebase.auth().signInWithEmailAndPassword(e, p)
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('pass').value;
+
+    auth.signInWithEmailAndPassword(email, pass)
         .then(() => enterApp())
         .catch(err => alert(err.message));
 }
 
-function logout() {
-    firebase.auth().signOut().then(() => location.reload());
-}
 
 function enterApp() {
     document.getElementById('auth-page').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    loadData();
+    loadUserData();
 }
 
-function show(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
 
-function addTodo() {
-    const user = firebase.auth().currentUser;
-    const val = document.getElementById('todoIn').value;
-    if(user && val) {
-        db.collection("users").doc(user.uid).collection("todos").add({
-            text: val, time: Date.now()
-        }).then(() => document.getElementById('todoIn').value = "");
+function loadUserData() {
+    const user = auth.currentUser;
+    if (user) {
+        db.collection("users").doc(user.uid).get().then((doc) => {
+            if (doc.exists) {
+                const name = doc.data().displayName;
+                document.getElementById('welcome-msg').innerText = `Welcome back, ${name}! 🌸`;
+            }
+        });
     }
 }
-function loadData() {
-    const user = firebase.auth().currentUser;
-    
-    // adding the name so I can add the "welcome back...(name)"
-    db.collection("users").doc(user.uid).get().then((doc) => {
-        if (doc.exists) {
-            const name = doc.data().displayName;
-            document.querySelector('#home h3').innerHTML = `Welcome back, ${name}! 🌸`;
-        }
+
+
+function logout() {
+    auth.signOut().then(() => {
+        location.reload(); // Refresh to go back to login screen
     });
 }
 
-function delTodo(id) {
-    const user = firebase.auth().currentUser;
-    confetti({ particleCount: 40 });
-    db.collection("users").doc(user.uid).collection("todos").doc(id).delete();
+
+function show(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
 }
