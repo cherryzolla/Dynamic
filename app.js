@@ -1,13 +1,24 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "YOUR_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_ID",
-    storageBucket: "YOUR_BUCKET",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
+  apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
+  authDomain: "dynamic-40949.firebaseapp.com",
+  projectId: "dynamic-40949",
+  storageBucket: "dynamic-40949.firebasestorage.app",
+  messagingSenderId: "377647789786",
+  appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3",
+  measurementId: "G-9KWEJYE88T"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 function register() {
     const e = document.getElementById('email').value;
