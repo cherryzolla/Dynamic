@@ -13,6 +13,15 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        enterApp();
+    } else {
+        document.getElementById('auth-page').style.display = 'block';
+        document.getElementById('main-app').style.display = 'none';
+    }
+});
+
 function toggleAuth(mode) {
     const nameField = document.getElementById('name-field');
     const loginActions = document.getElementById('login-actions');
@@ -32,25 +41,21 @@ function toggleAuth(mode) {
     }
 }
 
+
 function register() {
     const name = document.getElementById('userName').value;
-    const invite = document.getElementById('inviteCode').value.trim(); // Added trim() just in case of accidental spaces
+    const invite = document.getElementById('inviteCode').value.trim();
     const email = document.getElementById('email').value.trim();
     const pass = document.getElementById('pass').value;
 
-    // da lil invitie code
     if(invite !== "AuraAraAprilAya3852") { 
         return alert("Sorry! You need a valid invite code to join this club. 🌸");
     }
+    if(!name || !email || !pass) return alert("Fill everything out! ✨");
 
-    if(!name || !email || !pass) return alert("Please fill out everything! ✨");
-
-    // The rest of your createUser code...
-}
-    firebase.auth().createUserWithEmailAndPassword(email, pass)
+    auth.createUserWithEmailAndPassword(email, pass)
         .then((userCredential) => {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            // Save the user's name to Firestore
             return db.collection("users").doc(userCredential.user.uid).set({
                 displayName: name,
                 created: new Date()
@@ -64,7 +69,6 @@ function register() {
 function login() {
     const email = document.getElementById('email').value.trim();
     const pass = document.getElementById('pass').value;
-
     auth.signInWithEmailAndPassword(email, pass)
         .then(() => enterApp())
         .catch(err => alert(err.message));
@@ -77,26 +81,20 @@ function enterApp() {
     loadUserData();
 }
 
-
 function loadUserData() {
     const user = auth.currentUser;
     if (user) {
         db.collection("users").doc(user.uid).get().then((doc) => {
             if (doc.exists) {
-                const name = doc.data().displayName;
-                document.getElementById('welcome-msg').innerText = `Welcome back, ${name}! 🌸`;
+                document.getElementById('welcome-msg').innerText = `Keep killing it, ${doc.data().displayName}! ✨`;
             }
         });
     }
 }
 
-
 function logout() {
-    auth.signOut().then(() => {
-        location.reload(); // Refresh to go back to login screen
-    });
+    auth.signOut().then(() => location.reload());
 }
-
 
 function show(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
