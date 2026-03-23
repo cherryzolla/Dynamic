@@ -1,90 +1,20 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
-  authDomain: "dynamic-40949.firebaseapp.com",
-  projectId: "dynamic-40949",
-  storageBucket: "dynamic-40949.firebasestorage.app",
-  messagingSenderId: "377647789786",
-  appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3",
-  measurementId: "G-9KWEJYE88T"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth(); 
-const db = firebase.firestore();
-
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        enterApp();
-    } else {
-        document.getElementById('auth-page').style.display = 'block';
-        document.getElementById('main-app').style.display = 'none';
-    }
-});
-
-function toggleAuth(mode) {
-    const nameField = document.getElementById('name-field');
-    const loginActions = document.getElementById('login-actions');
-    const registerActions = document.getElementById('register-actions');
-    const title = document.getElementById('auth-title');
-
-    if (mode === 'register') {
-        nameField.style.display = 'block';
-        registerActions.style.display = 'block';
-        loginActions.style.display = 'none';
-        title.innerText = "🌸 Join Us";
-    } else {
-        nameField.style.display = 'none';
-        registerActions.style.display = 'none';
-        loginActions.style.display = 'block';
-        title.innerText = "🌸 Login";
-    }
-}
-
-
-function register() {
-    const name = document.getElementById('userName').value;
-    const invite = document.getElementById('inviteCode').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('pass').value;
-
-    if(invite !== "AuraAraAprilAya3852") { 
-        return alert("Sorry! You need a valid invite code to join this club. 🌸");
-    }
-    if(!name || !email || !pass) return alert("Fill everything out! ✨");
-
-    firebase.auth().createUserWithEmailAndPassword(email, pass)
-        .then((userCredential) => {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            return firebase.firestore().collection("users").doc(userCredential.user.uid).set({
-                displayName: name,
-                created: new Date()
-            });
-        })
-        .then(() => enterApp())
-        .catch(err => alert(err.message));
-}
-
-
-function login() {
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('pass').value;
-    auth.signInWithEmailAndPassword(email, pass)
-        .then(() => enterApp())
-        .catch(err => alert(err.message));
-}
-
 
 function enterApp() {
     document.getElementById('auth-page').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
     loadUserData();
+    loadDumps(); // Pulls your thoughts from the cloud
+}
+
+function show(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
 }
 
 function loadUserData() {
     const user = auth.currentUser;
     if (user) {
-        firebase.firestore().collection("users").doc(user.uid).get().then((doc) => {
+        db.collection("users").doc(user.uid).get().then((doc) => {
             if (doc.exists) {
                 document.getElementById('welcome-msg').innerText = `Keep killing it, ${doc.data().displayName}! ✨`;
             }
@@ -92,11 +22,35 @@ function loadUserData() {
     }
 }
 
-function logout() {
-    auth.signOut().then(() => location.reload());
+// --- THE DUMP LOGIC ---
+function addDump() {
+    const text = document.getElementById('dumpIn').value;
+    const user = auth.currentUser;
+    if (!text) return alert("Type something first! 🌪️");
+
+    db.collection("users").doc(user.uid).collection("dumps").add({
+        content: text,
+        timestamp: new Date()
+    }).then(() => {
+        document.getElementById('dumpIn').value = "";
+        loadDumps();
+    });
 }
 
-function show(pageId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
+function loadDumps() {
+    const user = auth.currentUser;
+    const dumpList = document.getElementById('dump-list');
+    
+    db.collection("users").doc(user.uid).collection("dumps")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) => {
+          dumpList.innerHTML = "";
+          snapshot.forEach((doc) => {
+              const data = doc.data();
+              dumpList.innerHTML += `
+                <div class="card" style="font-size: 14px; border-left: 5px solid #ff8fb1; margin-bottom: 10px;">
+                    ${data.content}
+                </div>`;
+          });
+      });
 }
