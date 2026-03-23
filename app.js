@@ -1,4 +1,3 @@
-
 const firebaseConfig = {
   apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
   authDomain: "dynamic-40949.firebaseapp.com",
@@ -9,8 +8,9 @@ const firebaseConfig = {
   measurementId: "G-9KWEJYE88T"
 };
 
+firebase.initializeApp(firebaseConfig);
 
-const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(); 
 const db = firebase.firestore();
 
 auth.onAuthStateChanged((user) => {
@@ -53,10 +53,10 @@ function register() {
     }
     if(!name || !email || !pass) return alert("Fill everything out! ✨");
 
-    auth.createUserWithEmailAndPassword(email, pass)
+    firebase.auth().createUserWithEmailAndPassword(email, pass)
         .then((userCredential) => {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            return db.collection("users").doc(userCredential.user.uid).set({
+            return firebase.firestore().collection("users").doc(userCredential.user.uid).set({
                 displayName: name,
                 created: new Date()
             });
@@ -84,7 +84,7 @@ function enterApp() {
 function loadUserData() {
     const user = auth.currentUser;
     if (user) {
-        db.collection("users").doc(user.uid).get().then((doc) => {
+        firebase.firestore().collection("users").doc(user.uid).get().then((doc) => {
             if (doc.exists) {
                 document.getElementById('welcome-msg').innerText = `Keep killing it, ${doc.data().displayName}! ✨`;
             }
