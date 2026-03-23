@@ -65,13 +65,37 @@
                 <div id="dump-list" style="margin-top: 20px;"></div>
             </div>
         </div>
+    <div class="card habits-section">
+    <h3 style="color: var(--accent);">🌸 Health Habits</h3>
+    
+    <div class="habit-container">
+        <span>Mental Health (Tasks)</span>
+        <div class="stat-bar"><div id="stress-fill" class="fill" style="width: 100%;"></div></div>
     </div>
+
+    <div class="habit-container">
+        <span>Hydration (8 glasses)</span>
+        <div class="stat-bar"><div id="water-fill" class="fill-blue" style="width: 0%;"></div></div>
+        <button onclick="drinkWater()" class="bubbly-btn" style="margin-top:5px; font-size:10px;">+ Drink</button>
+    </div>
+
+    <div class="habit-container" style="margin-top:15px;">
+        <span id="current-mood">Status: Normal Girl ✨</span>
+        <div style="display: flex; gap: 10px; margin-top: 5px;">
+            <button onclick="setMood('🔥 Grinding')" class="mini-btn">🔥</button>
+            <button onclick="setMood('😴 Exhausted')" class="mini-btn">😴</button>
+            <button onclick="setMood('🍡 Vibing')" class="mini-btn">🍡</button>
+        </div>
+    </div>
+</div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+    
+    <script src="./habits.js"></script>
     <script src="./auth.js"></script>
     <script src="./app.js"></script>
 </body>
