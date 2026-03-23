@@ -57,14 +57,18 @@
         </div>
 
         <div id="dump" class="page">
-            <div class="card">
-                <h3>🌪️ THE DUMP</h3>
-                <p style="font-size: 12px; color: #888;">Song lyrics, food blog ideas, and school rants.</p>
-                <textarea id="dumpIn" placeholder="Start typing..."></textarea>
-                <button onclick="addDump()" class="bubbly-btn" style="width: 100%;">Save to Archive</button>
-                <div id="dump-list" style="margin-top: 20px;"></div>
-            </div>
+    <div class="card" style="height: 80vh; display: flex; flex-direction: column;">
+        <h3>🌪️ THE VISUAL DUMP</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="dumpIn" placeholder="Type a vlog idea or lyric..." style="flex: 1;">
+            <button onclick="addDump()" class="bubbly-btn">Dump It! ✨</button>
         </div>
+        
+        <div id="canvas-container" style="flex: 1; position: relative; overflow: hidden; background: #fffaf0; border: 2px dashed var(--pink); border-radius: 15px; margin-top: 15px;">
+            <canvas id="dumpCanvas"></canvas>
+        </div>
+    </div>
+</div>
     <div class="card habits-section">
     <h3 style="color: var(--accent);">🌸 Health Habits</h3>
     
