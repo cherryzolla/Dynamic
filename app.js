@@ -12,12 +12,22 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const analytics = getAnalytics(app);
 
 function register() {
-    const e = document.getElementById('email').value;
-    const p = document.getElementById('pass').value;
-    firebase.auth().createUserWithEmailAndPassword(e, p)
+    const name = document.getElementById('userName').value;
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('pass').value;
+
+    if(!name) return alert("Please enter your name! ✨");
+
+    firebase.auth().createUserWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+            // This saves your name to your private folder in Firestore
+            return db.collection("users").doc(userCredential.user.uid).set({
+                displayName: name,
+                joinedDate: new Date()
+            });
+        })
         .then(() => enterApp())
         .catch(err => alert(err.message));
 }
@@ -55,17 +65,16 @@ function addTodo() {
         }).then(() => document.getElementById('todoIn').value = "");
     }
 }
-
 function loadData() {
     const user = firebase.auth().currentUser;
-    db.collection("users").doc(user.uid).collection("todos").orderBy("time", "desc")
-        .onSnapshot(snap => {
-            let h = "";
-            snap.forEach(doc => {
-                h += `<div class="item"><span>${doc.data().text}</span><button onclick="delTodo('${doc.id}')" style="border:none; background:none;">🌸</button></div>`;
-            });
-            document.getElementById('todo-list').innerHTML = h;
-        });
+    
+    // adding the name so I can add the "welcome back...(name)"
+    db.collection("users").doc(user.uid).get().then((doc) => {
+        if (doc.exists) {
+            const name = doc.data().displayName;
+            document.querySelector('#home h3').innerHTML = `Welcome back, ${name}! 🌸`;
+        }
+    });
 }
 
 function delTodo(id) {
