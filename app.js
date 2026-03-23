@@ -34,11 +34,19 @@ function toggleAuth(mode) {
 
 function register() {
     const name = document.getElementById('userName').value;
+    const invite = document.getElementById('inviteCode').value.trim(); // Added trim() just in case of accidental spaces
     const email = document.getElementById('email').value.trim();
     const pass = document.getElementById('pass').value;
 
+    // da lil invitie code
+    if(invite !== "AuraAraAprilAya3852") { 
+        return alert("Sorry! You need a valid invite code to join this club. 🌸");
+    }
+
     if(!name || !email || !pass) return alert("Please fill out everything! ✨");
 
+    // The rest of your createUser code...
+}
     firebase.auth().createUserWithEmailAndPassword(email, pass)
         .then((userCredential) => {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
