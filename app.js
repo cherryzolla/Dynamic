@@ -39,7 +39,7 @@ function register() {
 
     if(!name || !email || !pass) return alert("Please fill out everything! ✨");
 
-    auth.createUserWithEmailAndPassword(email, pass)
+    firebase.auth().createUserWithEmailAndPassword(email, pass)
         .then((userCredential) => {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             // Save the user's name to Firestore
