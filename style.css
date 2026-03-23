@@ -1,0 +1,17 @@
+:root {
+    --bg: #fffaf0; --pink: #ffdae9; --accent: #ff8fb1; --mint: #e0f2f1;
+}
+body { font-family: 'Quicksand', sans-serif; background: var(--bg); color: #555; margin: 0; }
+
+.auth-page { height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #fff5f8, #e0f2f1); }
+.auth-box { background: white; padding: 30px; border-radius: 30px; border: 3px solid var(--pink); text-align: center; width: 300px; }
+
+input, textarea { width: 85%; padding: 12px; margin: 8px 0; border-radius: 15px; border: 1px solid #eee; outline: none; font-family: 'Quicksand'; }
+
+.nav { display: flex; justify-content: space-around; background: white; padding: 15px; border-bottom: 2px solid var(--pink); position: sticky; top: 0; }
+.page { display: none; padding: 20px; max-width: 500px; margin: auto; }
+.active { display: block; }
+
+.card { background: white; border-radius: 20px; padding: 15px; border: 2px solid var(--pink); margin-bottom: 15px; box-shadow: 4px 4px 0 #ffeff5; }
+.bubbly-btn { background: var(--pink); border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; color: var(--accent); }
+.item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; border-left: 5px solid var(--pink); }
