@@ -1,4 +1,3 @@
-
 const firebaseConfig = {
     apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
     authDomain: "dynamic-40949.firebaseapp.com",
@@ -14,7 +13,6 @@ const db = firebase.firestore();
 
 const canvas = document.getElementById('prismCanvas');
 const ctx = canvas.getContext('2d');
-
 
 let game = {
     active: false,
@@ -35,8 +33,8 @@ let player = {
 };
 
 let otherPlayers = {}; 
-game.bg.src = "assets/rooms/Fantage_Downtown_BareBones.png";
 
+game.bg.src = "assets/rooms/Fantage_Downtown_BareBones.png";
 
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -57,7 +55,6 @@ auth.onAuthStateChanged(user => {
         window.location.href = "index.html";
     }
 });
-
 
 function startMultiplayer() {
     db.collection("active_players").onSnapshot(snapshot => {
@@ -83,7 +80,6 @@ function startMultiplayer() {
     });
 }
 
-
 canvas.addEventListener('mousedown', (e) => {
     const rect = canvas.getBoundingClientRect();
     player.targetX = (e.clientX - rect.left) + game.cameraX;
@@ -94,9 +90,10 @@ const chatInput = document.getElementById('chat-input');
 if(chatInput) {
     chatInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && chatInput.value.trim() !== "") {
-            player.message = chatInput.value;
+            const msg = chatInput.value;
+            player.message = msg;
             chatInput.value = "";
-            db.collection("active_players").doc(player.id).update({ message: player.message });
+            db.collection("active_players").doc(player.id).update({ message: msg });
             setTimeout(() => {
                 player.message = "";
                 if(player.id) db.collection("active_players").doc(player.id).update({ message: "" });
@@ -112,17 +109,14 @@ function startGame() {
     loop();
 }
 
-
 function loop() {
     if (!game.active) return;
     game.frameCount++;
 
-    
     player.x += (player.targetX - player.x) * 0.12;
     player.y += (player.targetY - player.y) * 0.12;
     game.cameraX = player.x - canvas.width / 2;
 
-    
     if (player.id && game.frameCount % 6 === 0) {
         db.collection("active_players").doc(player.id).set({
             x: Math.round(player.x),
@@ -134,33 +128,26 @@ function loop() {
         }, { merge: true });
     }
 
-    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     
     if (game.bg.complete && game.bg.naturalWidth !== 0) {
         ctx.drawImage(game.bg, -game.cameraX, 0);
     } else {
-        ctx.fillStyle = "#87CEEB"; // Fallback sky blue
+        ctx.fillStyle = "#87CEEB"; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    
     Object.keys(otherPlayers).forEach(id => {
         const p = otherPlayers[id];
-        if (p.img && p.img.complete && p.img.naturalWidth !== 0) {
+        if (p.img && p.img.complete) {
             ctx.drawImage(p.img, p.x - game.cameraX - (player.width/2), p.y - player.height, player.width, player.height);
             drawLabel(p.name, p.message, p.x, p.y);
         }
     });
 
-    
     if (player.img.complete && player.img.naturalWidth !== 0) {
         ctx.drawImage(player.img, player.x - game.cameraX - (player.width/2), player.y - player.height, player.width, player.height);
         drawLabel(player.name, player.message, player.x, player.y);
-    } else {
-        ctx.fillStyle = "#ff8fb1";
-        ctx.fillRect(player.x - game.cameraX - 10, player.y - 20, 20, 20);
     }
 
     requestAnimationFrame(loop);
@@ -169,31 +156,35 @@ function loop() {
 function drawLabel(name, message, x, y) {
     const screenX = x - game.cameraX;
     
-    // Speech Bubble
     if (message) {
         ctx.font = "14px Arial";
         const tw = ctx.measureText(message).width;
         ctx.fillStyle = "white";
         ctx.strokeStyle = "#ff8fb1";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(screenX - (tw/2) - 10, y - player.height - 40, tw + 20, 30, 10);
+        ctx.roundRect(screenX - (tw/2) - 10, y - player.height - 45, tw + 20, 30, 10);
         ctx.fill(); ctx.stroke();
         ctx.fillStyle = "black";
-        ctx.fillText(message, screenX, y - player.height - 20);
+        ctx.textAlign = "center";
+        ctx.fillText(message, screenX, y - player.height - 25);
     }
 
-    
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     ctx.strokeStyle = "black";
     ctx.lineWidth = 3;
-    ctx.strokeText(name, screenX, y + 20);
-    ctx.fillText(name, screenX, y + 20);
+    ctx.strokeText(name, screenX, y + 25);
+    ctx.fillText(name, screenX, y + 25);
 }
 
 document.getElementById('set-btn').addEventListener('click', () => {
     if(confirm("Logout?")) {
         db.collection("active_players").doc(player.id).delete().then(() => auth.signOut());
     }
+});
+
+window.addEventListener("beforeunload", () => {
+    if (player.id) db.collection("active_players").doc(player.id).delete();
 });
