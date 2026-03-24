@@ -17,35 +17,31 @@ const ITEM_DATABASE = {
     "t_hoodie_01": { name: "Blue Streak Hoodie", layer: "tops", gender: "M", rarity: "Common" },
 
     // --- BOARDS (Fantage Style!) ---
-    "b_star_01": { name: "Yellow Star Board", layer: "boards", gender: "U", rarity: "Rare" } 
+    "b_star_01": { name: "Yellow Star Board", layer: "boards", gender: "U", rarity: "Rare" }, 
 
-    // Add this inside your ITEM_DATABASE in assets.js
+    // --- ROOMS (Backgrounds) ---
     "room_downtown": { 
-    name: "Downtown", 
-    type: "background", 
-    src: "assets/rooms/Fantage_Downtown_BareBones.png" // Make sure this matches your folder!
+        name: "Downtown", 
+        type: "background", 
+        src: "assets/rooms/Fantage_Downtown_BareBones.png" 
+    },
 
-        // Add this inside your ITEM_DATABASE in assets.js
     "room_uptown": { 
-    name: "Uptown", 
-    type: "background", 
-    src: "assets/rooms/Fantage_Uptown_BareBones.png" // Make sure this matches your folder!
-},
-},
+        name: "Uptown", 
+        type: "background", 
+        src: "assets/rooms/Fantage_Uptown_BareBones.png" 
+    }
 };
 
 /**
  * Helper function to construct the file path dynamically.
- * Standardizes folder structure: assets/items/[gender]/[layer]/[id].png
  */
 function getItemPath(itemId) {
     const item = ITEM_DATABASE[itemId];
     if (!item) return null;
 
-    // If a specific source is already defined (like for bodies), use it.
     if (item.src) return item.src;
 
-    // Handle "Universal" items (U) or Gender-specific
     const genderFolder = item.gender === "M" ? "boy" : (item.gender === "F" ? "girl" : "unisex");
     return `assets/items/${genderFolder}/${item.layer}/${itemId}.png`;
 }
@@ -57,7 +53,6 @@ function loadItemImage(itemId) {
     return new Promise((resolve) => {
         const path = getItemPath(itemId);
         
-        // If no path, just skip it so we don't get stuck
         if (!path) {
             console.warn("No path for:", itemId);
             resolve(null); 
@@ -71,7 +66,6 @@ function loadItemImage(itemId) {
         
         img.onerror = () => {
             console.error("Failed to load image at: " + path);
-            // RESOLVE anyway so the loading screen disappears!
             resolve(null); 
         };
     });
