@@ -12,7 +12,37 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+// ... (Your Firebase Config stays here at the top) ...
 
+async function confirmCharacter() {
+    if (!chosenGender) return;
+    
+    const user = auth.currentUser;
+    // Get the name from the input field
+    const nameInput = document.getElementById('userName').value || "User";
+
+    const starterData = {
+        username: nameInput,
+        gender: chosenGender,
+        stars: 1000,
+        level: 1,
+        currentOutfit: {
+            // These IDs now match the keys in assets.js!
+            body: chosenGender === 'F' ? 'body_f' : 'body_m',
+            hair: 'none',
+            tops: 'none'
+        }
+    };
+
+    try {
+        await db.collection("users").doc(user.uid).set(starterData);
+        window.location.href = "play.html";
+    } catch (e) {
+        alert("Error saving: " + e.message);
+    }
+}
+
+// ... (Rest of your login/register functions) ...
 // --- AUTH OBSERVER ---
 // This watches if someone logs in and decides where to send them
 auth.onAuthStateChanged((user) => {

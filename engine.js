@@ -1,19 +1,25 @@
+/**
+ * PRISM ENGINE - Core Rendering
+ */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 let player = {
     x: 400,
     y: 300,
-    username: "User",
-    currentOutfit: { body: 'body_f', hair: 'none', tops: 'none' }
+    username: "Traveler",
+    currentOutfit: { body: 'none', hair: 'none', tops: 'none' }
 };
 
-// This matches the order things are stacked (Body on bottom, Hair on top)
 const LAYER_ORDER = ['body', 'tops', 'hair'];
 
 function initEngine(userData) {
-    player.username = userData.username;
-    player.currentOutfit = userData.currentOutfit;
+    console.log("🌸 Engine Received User Data:", userData);
+    
+    // Match the field names from your Firestore
+    player.username = userData.username || "New User";
+    player.currentOutfit = userData.currentOutfit || { body: 'none' };
+    
     gameLoop();
 }
 
@@ -24,31 +30,31 @@ function gameLoop() {
 }
 
 function drawPlayer(p) {
-    // 🌸 The Fix: If currentOutfit doesn't exist yet, stop here!
-    if (!p || !p.currentOutfit) return; 
-
     LAYER_ORDER.forEach(layer => {
         const itemId = p.currentOutfit[layer];
         
-        // Only try to draw if there is an actual item ID
         if (itemId && itemId !== 'none') {
-            const imgPath = getItemPath(itemId); 
+            // Inside engine.js -> drawPlayer function
+const itemId = p.currentOutfit[layer];
+const imgPath = getItemPath(itemId);
+            
             if (imgPath) {
                 const img = new Image();
                 img.src = imgPath;
+                // Draw centered at player position
                 ctx.drawImage(img, p.x - 50, p.y - 100, 100, 150); 
             }
         }
     });
 
-    // Draw Username Label
-    ctx.font = "bold 14px Quicksand";
+    // Draw Name Label
+    ctx.font = "bold 16px 'Quicksand', sans-serif";
     ctx.fillStyle = "white";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 3;
     ctx.textAlign = "center";
-    ctx.fillText(p.username || "Traveler", p.x, p.y + 70);
-}
-
-function sendChat(msg) {
-    console.log(`${player.username} says: ${msg}`);
-    // Future: Logic to show a speech bubble!
+    
+    // Outline for readability
+    ctx.strokeText(p.username, p.x, p.y + 70);
+    ctx.fillText(p.username, p.x, p.y + 70);
 }
