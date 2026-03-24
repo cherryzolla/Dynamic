@@ -24,14 +24,20 @@ function gameLoop() {
 }
 
 function drawPlayer(p) {
+    // 🌸 The Fix: If currentOutfit doesn't exist yet, stop here!
+    if (!p || !p.currentOutfit) return; 
+
     LAYER_ORDER.forEach(layer => {
         const itemId = p.currentOutfit[layer];
+        
+        // Only try to draw if there is an actual item ID
         if (itemId && itemId !== 'none') {
-            const imgPath = getItemPath(itemId); // From assets.js
-            const img = new Image();
-            img.src = imgPath;
-            // Draw centered at player position
-            ctx.drawImage(img, p.x - 50, p.y - 100, 100, 150); 
+            const imgPath = getItemPath(itemId); 
+            if (imgPath) {
+                const img = new Image();
+                img.src = imgPath;
+                ctx.drawImage(img, p.x - 50, p.y - 100, 100, 150); 
+            }
         }
     });
 
@@ -39,7 +45,7 @@ function drawPlayer(p) {
     ctx.font = "bold 14px Quicksand";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    ctx.fillText(p.username, p.x, p.y + 70);
+    ctx.fillText(p.username || "Traveler", p.x, p.y + 70);
 }
 
 function sendChat(msg) {
