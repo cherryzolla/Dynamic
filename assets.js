@@ -40,13 +40,25 @@ function getItemPath(itemId) {
  * Preloader function to ensure images are ready before drawing to canvas.
  */
 function loadItemImage(itemId) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const path = getItemPath(itemId);
-        if (!path) reject("Item not found");
+        
+        // If no path, just skip it so we don't get stuck
+        if (!path) {
+            console.warn("No path for:", itemId);
+            resolve(null); 
+            return;
+        }
 
         const img = new Image();
         img.src = path;
+        
         img.onload = () => resolve(img);
-        img.onerror = () => reject("Failed to load image at " + path);
+        
+        img.onerror = () => {
+            console.error("Failed to load image at: " + path);
+            // RESOLVE anyway so the loading screen disappears!
+            resolve(null); 
+        };
     });
 }
