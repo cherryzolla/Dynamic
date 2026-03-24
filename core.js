@@ -39,7 +39,7 @@ let otherPlayers = {};
 
 // 4. Asset Setup 
 // IMPORTANT: Check your actual filenames! GitHub is case-sensitive.
-game.bg.src = "assets/rooms/fntg-full-map-barebones.pngg";
+game.bg.src = "assets/rooms/Fantage_Downtown_BareBones.png";
 
 // 5. Auth & Data Fetching
 auth.onAuthStateChanged(user => {
