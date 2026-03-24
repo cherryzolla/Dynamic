@@ -35,6 +35,17 @@
     <script src="./inventory.js"></script>
     <script src="./engine.js"></script>
     <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
+        authDomain: "dynamic-40949.firebaseapp.com",
+        projectId: "dynamic-40949",
+        storageBucket: "dynamic-40949.firebasestorage.app",
+        messagingSenderId: "377647789786",
+        appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3"
+    };
+
+    // 2. THE INITIALIZATION (This fixes the red error!)
+    firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
