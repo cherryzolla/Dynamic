@@ -2,87 +2,86 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 let player = {
-    x: 400,
-    y: 300,
-    targetX: 400, // Where the player IS GOING
-    targetY: 300,
-    speed: 0.15,  // How fast they glide (0.1 to 0.2 is best)
-    username: "Traveler",
-    currentOutfit: { body: 'body_f', hair: 'none', tops: 'none' }
+    x: 400, y: 300,
+    targetX: 400, targetY: 300,
+    speed: 0.15,
+    width: 60,  // 🌸 SHRUNK: Was 100
+    height: 90, // 🌸 SHRUNK: Was 150
+    username: "User",
+    currentOutfit: { body: 'body_f' }
 };
 
-const LAYER_ORDER = ['body', 'tops', 'hair'];
+let camera = { x: 0, y: 0 };
+let bgImage = new Image();
+bgImage.src = "assets/rooms/downtown.png"; // Default background
 
 // --- CLICK TO WALK ---
 canvas.addEventListener('mousedown', (e) => {
     const rect = canvas.getBoundingClientRect();
-    // Calculate exactly where the mouse clicked inside the canvas
-    player.targetX = e.clientX - rect.left;
-    player.targetY = e.clientY - rect.top;
-    
-    console.log(`Walking to: ${player.targetX}, ${player.targetY}`);
+    // We add camera.x/y so you click the WORLD, not just the screen
+    player.targetX = (e.clientX - rect.left) + camera.x;
+    player.targetY = (e.clientY - rect.top) + camera.y;
 });
 
 async function initEngine(userData) {
-    const statusText = document.getElementById('load-status');
+    player.username = userData.username || "User";
+    player.currentOutfit = userData.currentOutfit || { body: 'body_f' };
+    
+    // Hide Loader
     const loader = document.getElementById('game-loader');
-
-    try {
-        player.username = userData.username || "User";
-        player.currentOutfit = userData.currentOutfit || { body: 'body_f' };
-
-        // Pre-load the body so it doesn't flicker
-        await loadItemImage(player.currentOutfit.body);
-
-        if (loader) {
-            loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; }, 800);
-        }
-        gameLoop();
-    } catch (err) {
-        console.error("Init Error:", err);
+    if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => { loader.style.display = 'none'; }, 800);
     }
+    gameLoop();
 }
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    updateMovement(); // Move the player slightly every frame
+
+    // 1. Update Camera to follow player (Centered)
+    camera.x = player.x - canvas.width / 2;
+    camera.y = player.y - canvas.height / 2;
+
+    // 2. Draw Background (Offset by camera)
+    ctx.drawImage(bgImage, -camera.x, -camera.y);
+
+    // 3. Move & Draw Player
+    updateMovement();
     drawPlayer(player);
-    
+
     requestAnimationFrame(gameLoop);
 }
 
 function updateMovement() {
-    // Smooth Glide (Linear Interpolation)
     const dx = player.targetX - player.x;
     const dy = player.targetY - player.y;
-
     if (Math.abs(dx) > 1) player.x += dx * player.speed;
     if (Math.abs(dy) > 1) player.y += dy * player.speed;
 }
 
 function drawPlayer(p) {
+    const LAYER_ORDER = ['body', 'tops', 'hair'];
+    
     LAYER_ORDER.forEach(layer => {
         const itemId = p.currentOutfit[layer];
-        if (itemId && itemId !== 'none') {
-            const imgPath = getItemPath(itemId);
-            if (imgPath) {
-                const img = new Image();
-                img.src = imgPath;
-                if (img.complete) {
-                    ctx.drawImage(img, p.x - 50, p.y - 100, 100, 150);
-                }
+        const imgPath = getItemPath(itemId);
+        if (imgPath) {
+            const img = new Image();
+            img.src = imgPath;
+            if (img.complete) {
+                // Draw at shrunk size, offset by camera
+                ctx.drawImage(img, p.x - camera.x - (p.width/2), p.y - camera.y - p.height, p.width, p.height);
             }
         }
     });
 
-    // Username Label
-    ctx.font = "bold 16px 'Quicksand'";
+    // Username (moves with camera)
+    ctx.font = "bold 14px 'Quicksand'";
     ctx.textAlign = "center";
     ctx.strokeStyle = "black";
     ctx.lineWidth = 3;
-    ctx.strokeText(p.username, p.x, p.y + 70);
+    ctx.strokeText(p.username, p.x - camera.x, p.y - camera.y + 20);
     ctx.fillStyle = "white";
-    ctx.fillText(p.username, p.x, p.y + 70);
+    ctx.fillText(p.username, p.x - camera.x, p.y - camera.y + 20);
 }
