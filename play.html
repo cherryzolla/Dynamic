@@ -19,24 +19,35 @@
         </div>
 
         <canvas id="prismCanvas" width="800" height="494"></canvas>
-           <div id="inventory-window" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 480px; height: 380px; z-index: 1000;">
+           <div id="inventory-window" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 500px; z-index: 1000; font-family: 'Arial', sans-serif;">
     
-    <img src="assets/ui/fntg-ui-inventory-bg-1.png" style="position: absolute; width: 100%;">
+    <img src="assets/ui/fntg-ui-inventory-bg-1.png" style="position: absolute; width: 100%; height: 100%; border-radius: 15px;">
+    
+    <div style="position: absolute; top: 80px; left: 20px; right: 20px; bottom: 20px; background-color: #B5E2FF; border-radius: 10px; border: 2px solid #79B8E0;">
+        
+        <div id="inv-tabs" style="position: absolute; top: -42px; left: 10px; display: flex; gap: 2px;">
+            <img src="assets/ui/fntg-ui-inventory-buttons-hair.png" onclick="filterInv('hair')" style="cursor:pointer; height: 40px;">
+            <img src="assets/ui/fntg-ui-inventory-buttons-clothes.png" onclick="filterInv('tops')" style="cursor:pointer; height: 40px;">
+            <img src="assets/ui/fntg-ui-inventory-buttons-board.png" onclick="filterInv('board')" style="cursor:pointer; height: 40px;">
+            <img src="assets/ui/fntg-ui-inventory-buttons-accessory.png" onclick="filterInv('faceAcc')" style="cursor:pointer; height: 40px;">
+            <img src="assets/ui/fntg-ui-inventory-buttons-favorite.png" style="cursor:pointer; height: 40px;">
+            <img src="assets/ui/fntg-ui-inventory-buttons-creature.png" style="cursor:pointer; height: 40px;">
+        </div>
 
-    <img src="assets/ui/fntg-ui-inventory-bg-2.png" style="position: absolute; top: 50px; left: 25px; width: 430px;">
+        <div style="position: absolute; top: 20px; left: 20px; width: 500px; height: 360px; background: white; border: 2px solid #79B8E0; border-radius: 10px;">
+            <div id="item-grid" style="padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; overflow-y: auto; height: 100%;">
+                </div>
+        </div>
 
-    <img src="assets/ui/fntg-ui-inventory-character-preview-bg.png" style="position: absolute; top: 75px; left: 45px; width: 130px;">
-
-    <img src="assets/ui/fntg-ui-x-button.png" onclick="toggleInventory()" style="position: absolute; top: 15px; right: 15px; width: 25px; cursor: pointer;">
-
-    <div id="inv-tabs" style="position: absolute; top: 60px; right: 40px; display: flex; flex-direction: column; gap: 5px;">
-        <img src="assets/ui/fntg-ui-inventory-buttons-hair.png" class="tab" onclick="filterInv('hair')" style="cursor:pointer; width: 40px;">
-        <img src="assets/ui/fntg-ui-inventory-buttons-clothes.png" class="tab" onclick="filterInv('tops')" style="cursor:pointer; width: 40px;">
-        <img src="assets/ui/fntg-ui-inventory-buttons-board.png" class="tab" onclick="filterInv('board')" style="cursor:pointer; width: 40px;">
+        <div style="position: absolute; top: 20px; right: 20px; width: 220px; height: 360px;">
+            <img src="assets/ui/fntg-ui-inventory-character-preview-bg.png" style="width: 100%; height: 100%;">
+            <canvas id="previewCanvas" width="200" height="300" style="position: absolute; top: 30px; left: 10px;"></canvas>
+            
+            <button style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(#D38DFF, #9B4DFF); color: white; border: 2px solid white; border-radius: 15px; padding: 5px 15px; cursor: pointer; font-weight: bold;">Dye Your Hair!</button>
+        </div>
     </div>
 
-    <div id="item-grid" style="position: absolute; top: 85px; left: 190px; width: 230px; height: 200px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto;">
-        </div>
+    <img src="assets/ui/fntg-ui-x-button.png" onclick="toggleInventory()" style="position: absolute; top: 15px; right: 15px; width: 35px; cursor: pointer;">
 </div>
         <div class="ui-bar" style="position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 15px; pointer-events: none;">
             
