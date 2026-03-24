@@ -66,8 +66,10 @@ auth.onAuthStateChanged(user => {
             const skinNum = data.skinTone || 1;
             const genderPath = player.gender.toLowerCase();
             
-            player.equipment.body.src = `assets/items/${genderPath}/body/orig-body-${skinNum}_orig.png`;
-            player.equipment.face.src = `assets/items/${genderPath}/body/orig-face-${skinNum}_orig.png`;
+            let suffix = (player.gender === "M") ? `-${skinNum}` : "";
+            
+            player.equipment.body.src = `assets/items/${genderPath}/body/orig-body-${skinNum}${suffix}_orig.png`;
+            player.equipment.face.src = `assets/items/${genderPath}/body/orig-face-${skinNum}${suffix}_orig.png`;
             
             startMultiplayer();
             startGame();
@@ -104,6 +106,14 @@ function startMultiplayer() {
                 otherPlayers[id].message = data.message || "";
                 otherPlayers[id].currFrame = data.currFrame || 0;
                 otherPlayers[id].isWearingCostume = data.isWearingCostume || false;
+                
+                if (data.equipmentPaths) {
+                    Object.keys(data.equipmentPaths).forEach(layer => {
+                        if (otherPlayers[id].equipment[layer]) {
+                            otherPlayers[id].equipment[layer].src = data.equipmentPaths[layer];
+                        }
+                    });
+                }
             }
         });
     });
@@ -146,7 +156,12 @@ function loop() {
     player.y += (player.targetY - player.y) * 0.12;
     game.cameraX = player.x - canvas.width / 2;
 
-    if (player.id && game.frameCount % 6 === 0) {
+    if (player.id && game.frameCount % 10 === 0) {
+        let paths = {};
+        Object.keys(player.equipment).forEach(k => {
+            if(player.equipment[k].src) paths[k] = player.equipment[k].src;
+        });
+
         db.collection("active_players").doc(player.id).set({
             x: Math.round(player.x),
             y: Math.round(player.y),
@@ -155,6 +170,7 @@ function loop() {
             gender: player.gender,
             message: player.message,
             isWearingCostume: player.isWearingCostume,
+            equipmentPaths: paths,
             lastSeen: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
     }
