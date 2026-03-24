@@ -159,17 +159,23 @@ function drawLabel(name, message, x, y) {
     if (message) {
         ctx.font = "14px Arial";
         const tw = ctx.measureText(message).width;
-        ctx.fillStyle = "white";
-        ctx.strokeStyle = "#ff8fb1";
-        ctx.lineWidth = 2;
+
+        // 1. Transparent Background (no outline)
+        // Using rgba(255, 255, 255, 0.6) makes it 60% visible white
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)"; 
+        
         ctx.beginPath();
+        // We removed the ctx.strokeStyle and ctx.stroke() lines entirely
         ctx.roundRect(screenX - (tw/2) - 10, y - player.height - 45, tw + 20, 30, 10);
-        ctx.fill(); ctx.stroke();
+        ctx.fill(); 
+
+        // 2. Message Text
         ctx.fillStyle = "black";
         ctx.textAlign = "center";
         ctx.fillText(message, screenX, y - player.height - 25);
     }
 
+    // 3. Username (Standard look)
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
@@ -178,7 +184,6 @@ function drawLabel(name, message, x, y) {
     ctx.strokeText(name, screenX, y + 25);
     ctx.fillText(name, screenX, y + 25);
 }
-
 document.getElementById('set-btn').addEventListener('click', () => {
     if(confirm("Logout?")) {
         db.collection("active_players").doc(player.id).delete().then(() => auth.signOut());
