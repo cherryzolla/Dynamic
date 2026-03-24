@@ -40,6 +40,7 @@
     <script src="./inventory.js"></script>
     <script src="./engine.js"></script>
     <script>
+    // 1. Initialize Firebase first so everything else works
     const firebaseConfig = {
         apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
         authDomain: "dynamic-40949.firebaseapp.com",
@@ -49,30 +50,60 @@
         appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3"
     };
 
-    // 2. THE INITIALIZATION (This fixes the red error!)
     firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-        // Inside play.html
-auth.onAuthStateChanged(user => {
-    if (user) {
-        db.collection("users").doc(user.uid).get().then(doc => {
-            if (doc.exists) {
-                const userData = doc.data();
-                // Send ALL the data to the engine
-                initEngine(userData); 
-            }
-        });
-    }
-});
-
-        function handleChat() {
-            const input = document.getElementById('chat-input');
-            sendChat(input.value);
-            input.value = "";
+    // 2. Wait for the user, then start the engine
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            db.collection("users").doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                    initEngine(doc.data());
+                }
+            });
+        } else {
+            window.location.href = "index.html";
         }
-        function logout() { auth.signOut(); }
-    </script>
+    });
+
+    // 3. Connect the Buttons (The "Wiring")
+    document.querySelector('.hanger-btn').addEventListener('click', () => {
+        if (typeof toggleInventory === "function") toggleInventory();
+    });
+
+    document.querySelector('.settings-btn').addEventListener('click', () => {
+        const confirmLogout = confirm("Do you want to logout?");
+        if (confirmLogout) {
+            auth.signOut().then(() => { window.location.href = "index.html"; });
+        }
+    });
+
+    // 4. Chatbox Logic
+    const chatInput = document.querySelector('.chat-input');
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && chatInput.value.trim() !== "") {
+            sendChat(chatInput.value); // This function is in engine.js
+            chatInput.value = ""; 
+        }
+    });
+    // ⚙️ Settings / Logout Logic
+const settingsBtn = document.querySelector('.settings-btn'); // Make sure your HTML has class="settings-btn"
+
+if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+        const confirmLogout = confirm("Are you sure you want to leave Dynamic Prism?");
+        
+        if (confirmLogout) {
+            auth.signOut().then(() => {
+                console.log("Logged out successfully!");
+                window.location.href = "index.html"; // Teleport back to login
+            }).catch((error) => {
+                console.error("Logout Error:", error);
+            });
+        }
+    });
+}
+</script>
 </body>
 </html>
