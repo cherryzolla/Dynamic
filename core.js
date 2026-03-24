@@ -26,9 +26,9 @@ let player = {
     x: 400, y: 380,
     targetX: 400, targetY: 380,
     width: 60, height: 95, 
-    frameW: 100, // Change this to your actual sprite frame width
-    frameH: 100, // Change this to your actual sprite frame height
-    currFrame: 0, // 0=Stand, 1=Walk, etc.
+    frameW: 100, 
+    frameH: 100, 
+    currFrame: 0, 
     name: "User",
     gender: "F",
     message: "",
@@ -64,8 +64,10 @@ auth.onAuthStateChanged(user => {
             player.gender = data.gender || "F";
             
             const skinNum = data.skinTone || 1;
-            player.equipment.body.src = `assets/items/${player.gender.toLowerCase()}/body/orig-body-${skinNum}_orig.png`;
-            player.equipment.face.src = `assets/items/${player.gender.toLowerCase()}/body/orig-face-${skinNum}_orig.png`;
+            const genderPath = player.gender.toLowerCase();
+            
+            player.equipment.body.src = `assets/items/${genderPath}/body/orig-body-${skinNum}_orig.png`;
+            player.equipment.face.src = `assets/items/${genderPath}/body/orig-face-${skinNum}_orig.png`;
             
             startMultiplayer();
             startGame();
@@ -88,13 +90,20 @@ function startMultiplayer() {
                 if (!otherPlayers[id]) {
                     otherPlayers[id] = { 
                         ...data, 
-                        equipment: {} 
+                        equipment: {
+                            board: new Image(), pet: new Image(), body: new Image(),
+                            bottoms: new Image(), tops: new Image(), shoes: new Image(),
+                            face: new Image(), faceAcc: new Image(), hair: new Image(),
+                            headAcc: new Image(), bodyAcc: new Image(), moodie: new Image(),
+                            friendship: new Image(), costume: new Image()
+                        } 
                     };
                 }
                 otherPlayers[id].x = data.x;
                 otherPlayers[id].y = data.y;
                 otherPlayers[id].message = data.message || "";
                 otherPlayers[id].currFrame = data.currFrame || 0;
+                otherPlayers[id].isWearingCostume = data.isWearingCostume || false;
             }
         });
     });
@@ -145,6 +154,7 @@ function loop() {
             name: player.name,
             gender: player.gender,
             message: player.message,
+            isWearingCostume: player.isWearingCostume,
             lastSeen: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
     }
@@ -165,16 +175,22 @@ function loop() {
 }
 
 function drawCharacter(p) {
+    if (!p || !p.equipment) return;
+
     const px = p.x - game.cameraX - (player.width / 2);
     const py = p.y - player.height;
 
-    if (p.isWearingCostume && p.equipment.costume?.src) {
+    if (p.isWearingCostume && p.equipment.costume && p.equipment.costume.src) {
         renderLayer(p.equipment.board, px, py, p.currFrame);
         renderLayer(p.equipment.pet, px, py, p.currFrame);
         renderLayer(p.equipment.costume, px, py, p.currFrame);
     } else {
         const backLayers = ['board', 'pet'];
-        const frontLayers = ['body', 'bottoms', 'tops', 'shoes', 'face', 'faceAcc', 'hair', 'headAcc', 'bodyAcc', 'moodie', 'friendship'];
+        const frontLayers = [
+            'body', 'bottoms', 'tops', 'shoes', 
+            'face', 'faceAcc', 'hair', 'headAcc', 
+            'bodyAcc', 'moodie', 'friendship'
+        ];
         
         backLayers.forEach(layer => renderLayer(p.equipment[layer], px, py, p.currFrame));
         frontLayers.forEach(layer => renderLayer(p.equipment[layer], px, py, p.currFrame));
@@ -184,14 +200,15 @@ function drawCharacter(p) {
 }
 
 function renderLayer(imgObj, x, y, frame) {
-    if (!imgObj || !imgObj.complete || !imgObj.src) return;
-    ctx.drawImage(
-        imgObj,
-        frame * player.frameW, 0, 
-        player.frameW, player.frameH,
-        x, y, 
-        player.width, player.height
-    );
+    if (imgObj && imgObj.complete && imgObj.src && imgObj.src !== "" && !imgObj.src.includes('undefined')) {
+        ctx.drawImage(
+            imgObj,
+            frame * player.frameW, 0, 
+            player.frameW, player.frameH,
+            x, y, 
+            player.width, player.height
+        );
+    }
 }
 
 function drawLabel(name, message, x, y) {
@@ -231,20 +248,12 @@ document.getElementById('set-btn').addEventListener('click', () => {
 window.addEventListener("beforeunload", () => {
     if (player.id) db.collection("active_players").doc(player.id).delete();
 });
-// 🎒 OPEN INVENTORY
-const invBtn = document.getElementById('inv-btn');
-const invWindow = document.getElementById('inventory-window');
-const closeInv = document.getElementById('close-inv');
 
+const invBtn = document.getElementById('inv-btn');
 if (invBtn) {
     invBtn.addEventListener('click', () => {
-        invWindow.style.display = (invWindow.style.display === 'none') ? 'block' : 'none';
-    });
-}
-
-// ❌ CLOSE INVENTORY
-if (closeInv) {
-    closeInv.addEventListener('click', () => {
-        invWindow.style.display = 'none';
+        if (typeof toggleInventory === "function") {
+            toggleInventory();
+        }
     });
 }
