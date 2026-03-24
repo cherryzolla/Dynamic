@@ -97,7 +97,7 @@ if(chatInput) {
             setTimeout(() => {
                 player.message = "";
                 if(player.id) db.collection("active_players").doc(player.id).update({ message: "" });
-            }, 5000);
+            }, 10000);
         }
     });
 }
