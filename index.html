@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌸 Dynamic 🌸</title>
+    <title>🌸 Dynamic Prism 🌸</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
 </head>
@@ -11,96 +11,66 @@
 
     <div id="auth-page" class="auth-page">
         <div class="auth-box">
-            <h1 id="auth-title" style="color: #ff8fb1">🌸 Login</h1>
             
-            <div id="name-field" style="display:none;">
-                <input type="text" id="userName" placeholder="Your Name">
-                <input type="text" id="inviteCode" placeholder="Special Lil Invitie Code 🔑">
-            </div>
-
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="pass" placeholder="Password">
-            
-            <div id="login-actions" style="margin-top:10px;">
-                <button onclick="login()" class="bubbly-btn">Login</button>
-                <p style="font-size: 12px; cursor: pointer; color: #888; margin-top: 15px;" onclick="toggleAuth('register')">
-                    New here? Join the club! ✨
-                </p>
-            </div>
-
-            <div id="register-actions" style="display:none; margin-top:10px;">
-                <button onclick="register()" class="bubbly-btn" style="background: #e0f2f1; color: #4db6ac;">Create Account</button>
-                <p style="font-size: 12px; cursor: pointer; color: #888; margin-top: 15px;" onclick="toggleAuth('login')">
-                    Already have an account? Login! 🌸
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div id="main-app" style="display:none;">
-        <div class="nav">
-            <button onclick="show('home')">🏠</button>
-            <button onclick="show('dump')">🌪️</button>
-            <button onclick="logout()">👋</button>
-        </div>
-
-        <div id="home" class="page active">
-            <div class="card">
-                <h3 id="welcome-msg">Welcome back! 🌸</h3>
-                <p style="font-size: 13px; color: #999;">Manage your 7 classes & goals</p>
-                <hr style="border: 1px solid #fff5f8; margin: 15px 0;">
+            <div id="auth-fields">
+                <h1 id="auth-title" style="color: #ff8fb1">🌸 Login</h1>
                 
-                <input type="text" id="todoIn" placeholder="New task..." style="width:70%">
-                <button onclick="addTodo()" class="bubbly-btn">Add</button>
-                <div id="todo-list" style="margin-top:15px;"></div>
+                <div id="name-field" style="display:none;">
+                    <input type="text" id="userName" placeholder="Your Name">
+                    <input type="text" id="inviteCode" placeholder="Special Lil Invite Code 🔑">
+                </div>
+
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="pass" placeholder="Password">
+                
+                <div id="login-actions" style="margin-top:10px;">
+                    <button onclick="login()" class="bubbly-btn">Login</button>
+                    <p class="toggle-text" onclick="toggleAuth('register')">
+                        New here? Join the club! ✨
+                    </p>
+                </div>
+
+                <div id="register-actions" style="display:none; margin-top:10px;">
+                    <button onclick="register()" class="bubbly-btn" style="background: #e0f2f1; color: #4db6ac;">Create Account</button>
+                    <p class="toggle-text" onclick="toggleAuth('login')">
+                        Already have an account? Login! 🌸
+                    </p>
+                </div>
             </div>
-        </div>
 
-        <div id="dump" class="page">
-    <div class="card" style="height: 80vh; display: flex; flex-direction: column;">
-        <h3>🌪️ THE VISUAL DUMP</h3>
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="dumpIn" placeholder="Type a vlog idea or lyric..." style="flex: 1;">
-            <button onclick="addDump()" class="bubbly-btn">Dump It! ✨</button>
-        </div>
-        
-        <div id="canvas-container" style="flex: 1; position: relative; overflow: hidden; background: #fffaf0; border: 2px dashed var(--pink); border-radius: 15px; margin-top: 15px;">
-            <canvas id="dumpCanvas"></canvas>
-        </div>
-    </div>
-</div>
-    <div class="card habits-section">
-    <h3 style="color: var(--accent);">🌸 Health Habits</h3>
-    
-    <div class="habit-container">
-        <span>Mental Health (Tasks)</span>
-        <div class="stat-bar"><div id="stress-fill" class="fill" style="width: 100%;"></div></div>
-    </div>
+            <div id="char-setup" style="display:none; text-align: center; animation: fadeIn 0.5s;">
+                <h1 style="color: #ff8fb1; font-family: 'Quicksand';">Choose Your Look 🌸</h1>
+                <p style="color: #888; margin-bottom: 30px; font-size: 13px;">This will be your base avatar in Downtown!</p>
 
-    <div class="habit-container">
-        <span>Hydration (8 glasses)</span>
-        <div class="stat-bar"><div id="water-fill" class="fill-blue" style="width: 0%;"></div></div>
-        <button onclick="drinkWater()" class="bubbly-btn" style="margin-top:5px; font-size:10px;">+ Drink</button>
-    </div>
+                <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 40px;">
+                    <div class="char-option" onclick="selectGender('F')" id="option-f">
+                        <div class="char-preview-bg">
+                            <img src="assets/items/girl/body/fantage-girl-outline.png" alt="Girl Base">
+                        </div>
+                        <h3 style="margin-top: 15px;">GIRL</h3>
+                    </div>
 
-    <div class="habit-container" style="margin-top:15px;">
-        <span id="current-mood">Status: Normal Girl ✨</span>
-        <div style="display: flex; gap: 10px; margin-top: 5px;">
-            <button onclick="setMood('🔥 Grinding')" class="mini-btn">🔥</button>
-            <button onclick="setMood('😴 Exhausted')" class="mini-btn">😴</button>
-            <button onclick="setMood('🍡 Vibing')" class="mini-btn">🍡</button>
+                    <div class="char-option" onclick="selectGender('M')" id="option-m">
+                        <div class="char-preview-bg">
+                            <img src="assets/items/boy/body/fantage-boy-outline.png" alt="Boy Base">
+                        </div>
+                        <h3 style="margin-top: 15px;">BOY</h3>
+                    </div>
+                </div>
+
+                <button onclick="confirmCharacter()" id="enter-btn" class="bubbly-btn" style="width: 250px; display: none;">
+                    Confirm & Enter Prism ✨
+                </button>
+            </div>
+
         </div>
     </div>
-</div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    
-    <script src="./habits.js"></script>
     <script src="./auth.js"></script>
-    <script src="./app.js"></script>
-</body>
+    <script src="./assets.js"></script> </body>
 </html>

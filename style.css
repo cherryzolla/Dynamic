@@ -131,3 +131,57 @@ input, textarea {
     font-size: 18px;
     padding: 5px;
 }
+.char-option {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 4px solid transparent;
+    border-radius: 20px;
+    padding: 15px;
+}
+
+.char-preview-bg {
+    background: #fdf2f5; /* Soft beige-pink */
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid #eee;
+}
+
+.char-option:hover {
+    transform: scale(1.05);
+}
+
+.char-option.selected {
+    border-color: #ff8fb1; /* Your signature pink */
+    background: rgba(255, 143, 177, 0.1);
+}
+
+.char-option img {
+    height: 150px;
+    image-rendering: pixelated; /* Essential for that 2007-2018 look */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.toggle-text {
+    font-size: 12px; 
+    cursor: pointer; 
+    color: #888; 
+    margin-top: 15px;
+    transition: color 0.2s;
+}
+.toggle-text:hover { color: #ff8fb1; }
+
+.char-preview-bg {
+    background: #fff; /* or #fff5f8 for a pink tint */
+    border: 2px solid #ff8fb1;
+    border-radius: 12px;
+    padding: 10px;
+    transition: transform 0.2s;
+}
+
+.char-option.selected .char-preview-bg {
+    background: #ff8fb1;
+    border-color: #000;
+}

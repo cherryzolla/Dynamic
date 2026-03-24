@@ -76,3 +76,39 @@ function login() {
 function logout() {
     auth.signOut().then(() => location.reload());
 }
+let chosenGender = null;
+
+function selectGender(gender) {
+    chosenGender = gender;
+    
+    // UI Updates
+    document.getElementById('option-f').classList.remove('selected');
+    document.getElementById('option-m').classList.remove('selected');
+    document.getElementById(`option-${gender.toLowerCase()}`).classList.add('selected');
+    
+    // Show the "Enter" button
+    document.getElementById('enter-btn').style.display = 'inline-block';
+}
+
+async function confirmCharacter() {
+    if (!chosenGender) return;
+    
+    const user = auth.currentUser;
+    const username = document.getElementById('userName').value;
+
+    // Save their base identity to Firestore
+    await db.collection("users").doc(user.uid).set({
+        username: username,
+        gender: chosenGender,
+        stars: 1000, // Starter currency
+        level: 1,
+        currentOutfit: {
+            body: chosenGender === 'F' ? 'body_girl' : 'body_boy',
+            hair: 'none',
+            tops: 'none'
+        }
+    });
+
+    // Take them to the world!
+    window.location.href = "play.html";
+}
