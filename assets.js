@@ -18,6 +18,20 @@ const ITEM_DATABASE = {
 
     // --- BOARDS (Fantage Style!) ---
     "b_star_01": { name: "Yellow Star Board", layer: "boards", gender: "U", rarity: "Rare" } 
+
+    // Add this inside your ITEM_DATABASE in assets.js
+    "room_downtown": { 
+    name: "Downtown", 
+    type: "background", 
+    src: "assets/rooms/Fantage_Downtown_BareBones.png" // Make sure this matches your folder!
+
+        // Add this inside your ITEM_DATABASE in assets.js
+    "room_uptown": { 
+    name: "Uptown", 
+    type: "background", 
+    src: "assets/rooms/Fantage_Uptown_BareBones.png" // Make sure this matches your folder!
+},
+},
 };
 
 /**
