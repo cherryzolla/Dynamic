@@ -30,7 +30,7 @@ let player = {
     name: "User",
     img: new Image()
 };
-
+let otherPlayers = {}; // This will hold everyone else's data
 // 4. Set Initial Image Paths
 game.bg.src = "assets/rooms/Fantage_Downtown_BareBones.png";
 player.img.src = "assets/items/girl/body/fantage-girl-outline.png";
@@ -90,7 +90,16 @@ function loop() {
 
     // Draw Player
     ctx.drawImage(player.img, player.x - game.cameraX - (player.width/2), player.y - player.height, player.width, player.height);
-
+    // Inside the draw section of loop()
+    Object.keys(otherPlayers).forEach(id => {
+    const p = otherPlayers[id];
+    if (p.img.complete) {
+        ctx.drawImage(p.img, p.x - game.cameraX - (player.width/2), p.y - player.height, player.width, player.height);
+        
+        // Draw their name too
+        ctx.fillText(p.name, p.x - game.cameraX, p.y + 20);
+    }
+    });
     // Draw Username
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "center";
@@ -101,8 +110,43 @@ function loop() {
     ctx.fillText(player.name, player.x - game.cameraX, player.y + 20);
 
     requestAnimationFrame(loop);
+    // Inside loop()
+    if (game.active && frameCount % 6 === 0) { // frameCount is a new counter we'll add
+    db.collection("active_players").doc(auth.currentUser.uid).set({
+        x: player.x,
+        y: player.y,
+        name: player.name,
+        gender: player.gender,
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });}
 }
+function startMultiplayer() {
+    db.collection("active_players").onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+            const data = change.doc.data();
+            const id = change.doc.id;
 
+            // Don't draw yourself twice!
+            if (id === auth.currentUser.uid) return;
+
+            if (change.type === "removed") {
+                delete otherPlayers[id];
+            } else {
+                // If they don't have an image loaded yet, create one
+                if (!otherPlayers[id]) {
+                    otherPlayers[id] = data;
+                    otherPlayers[id].img = new Image();
+                    otherPlayers[id].img.src = data.gender === "M" ? 
+                        "assets/items/boy/body/fantage-boy-outline.png" : 
+                        "assets/items/girl/body/fantage-girl-outline.png";
+                }
+                // Update their coordinates
+                otherPlayers[id].x = data.x;
+                otherPlayers[id].y = data.y;
+            }
+        });
+    });
+}
 // 8. UI Button Wiring
 document.getElementById('inv-btn').addEventListener('click', () => alert("Inventory ✨"));
 document.getElementById('map-btn').addEventListener('click', () => alert("Map 🌸"));
