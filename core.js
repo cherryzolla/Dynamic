@@ -1,4 +1,4 @@
-// 1. Firebase Configuration (Matches your "dynamic-40949" project)
+// 1. Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
     authDomain: "dynamic-40949.firebaseapp.com",
@@ -31,150 +31,175 @@ let player = {
     width: 60, height: 95,
     name: "User",
     gender: "F",
+    message: "",
     img: new Image()
 };
 
-let otherPlayers = {}; // List for multiplayer "ghosts"
+let otherPlayers = {}; 
 
-// 4. Asset Setup (Using your exact filenames from the screenshot)
-game.bg.src = "assets/rooms/fntg-full-map-barebones.png";
+// 4. Asset Setup 
+// IMPORTANT: Check your actual filenames! GitHub is case-sensitive.
+game.bg.src = "assets/rooms/fntg-full-map-barebones.pngg";
 
 // 5. Auth & Data Fetching
 auth.onAuthStateChanged(user => {
     if (user) {
-        player.id = user.uid; // Store UID for the multiplayer document
-        
+        player.id = user.uid;
         db.collection("users").doc(user.uid).get().then(doc => {
             const data = doc.data() || {};
             player.name = data.username || "Traveler";
             player.gender = data.gender || "F";
             
-            // Logic: Pick the right folder based on gender
             player.img.src = player.gender === "M" ? 
                 "assets/items/boy/body/fantage-boy-outline.png" : 
                 "assets/items/girl/body/fantage-girl-outline.png";
             
-            startMultiplayer(); // Start the live listener
+            startMultiplayer();
             startGame();
-        }).catch(err => console.error("Error fetching user data:", err));
+        }).catch(err => console.error("Error fetching user:", err));
     } else {
-        window.location.href = "index.html"; // Kick to login if not authenticated
+        window.location.href = "index.html";
     }
 });
 
-// 6. Multiplayer Syncing (The "Live Listener")
+// 6. Multiplayer Listener
 function startMultiplayer() {
     db.collection("active_players").onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
             const data = change.doc.data();
             const id = change.doc.id;
-
-            if (id === player.id) return; // Don't draw yourself twice
+            if (id === player.id) return;
 
             if (change.type === "removed") {
                 delete otherPlayers[id];
             } else {
                 if (!otherPlayers[id]) {
                     otherPlayers[id] = { ...data, img: new Image() };
-                    // Assign gender-correct image for other players
                     otherPlayers[id].img.src = data.gender === "M" ? 
                         "assets/items/boy/body/fantage-boy-outline.png" : 
                         "assets/items/girl/body/fantage-girl-outline.png";
                 }
-                // Update their coordinates live
                 otherPlayers[id].x = data.x;
                 otherPlayers[id].y = data.y;
+                otherPlayers[id].message = data.message || "";
             }
         });
-    }, err => console.error("Multiplayer Listener Error:", err));
+    });
 }
 
-// 7. Input Handling
+// 7. Input & Chat
 canvas.addEventListener('mousedown', (e) => {
     const rect = canvas.getBoundingClientRect();
     player.targetX = (e.clientX - rect.left) + game.cameraX;
     player.targetY = (e.clientY - rect.top);
 });
 
+const chatInput = document.getElementById('chat-input');
+if(chatInput) {
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && chatInput.value.trim() !== "") {
+            player.message = chatInput.value;
+            chatInput.value = "";
+            db.collection("active_players").doc(player.id).update({ message: player.message });
+            setTimeout(() => {
+                player.message = "";
+                if(player.id) db.collection("active_players").doc(player.id).update({ message: "" });
+            }, 5000);
+        }
+    });
+}
+
 function startGame() {
     const loader = document.getElementById('loader');
-    if (loader) {
-        loader.style.opacity = '0';
-        setTimeout(() => { loader.style.display = 'none'; }, 500);
-    }
+    if (loader) { loader.style.display = 'none'; }
     game.active = true;
     loop();
 }
 
-// 8. The Main Game Loop
+// 8. Main Loop
 function loop() {
     if (!game.active) return;
     game.frameCount++;
 
-    // Local Movement
+    // Movement
     player.x += (player.targetX - player.x) * 0.12;
     player.y += (player.targetY - player.y) * 0.12;
-    
-    // Camera centers on player
     game.cameraX = player.x - canvas.width / 2;
 
-    // --- 📡 SEND POSITION TO FIREBASE ---
-    // This creates the "active_players" collection if it doesn't exist!
+    // Sync to Firebase
     if (player.id && game.frameCount % 6 === 0) {
         db.collection("active_players").doc(player.id).set({
             x: Math.round(player.x),
             y: Math.round(player.y),
             name: player.name,
             gender: player.gender,
+            message: player.message,
             lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true }).catch(err => console.error("Sync Error:", err));
+        }, { merge: true });
     }
 
-    // Render Everything
+    // --- RENDER ---
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 1. Draw Map
-    if (game.bg.complete) {
+    // Draw BG with Safety Gate
+    if (game.bg.complete && game.bg.naturalWidth !== 0) {
         ctx.drawImage(game.bg, -game.cameraX, 0);
+    } else {
+        ctx.fillStyle = "#87CEEB"; // Fallback sky blue
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // 2. Draw Other Players
+    // Draw Others
     Object.keys(otherPlayers).forEach(id => {
         const p = otherPlayers[id];
-        if (p.img && p.img.complete) {
+        if (p.img && p.img.complete && p.img.naturalWidth !== 0) {
             ctx.drawImage(p.img, p.x - game.cameraX - (player.width/2), p.y - player.height, player.width, player.height);
-            drawLabel(p.name, p.x, p.y);
+            drawLabel(p.name, p.message, p.x, p.y);
         }
     });
 
-    // 3. Draw Local Player
-    if (player.img.complete) {
+    // Draw Self
+    if (player.img.complete && player.img.naturalWidth !== 0) {
         ctx.drawImage(player.img, player.x - game.cameraX - (player.width/2), player.y - player.height, player.width, player.height);
-        drawLabel(player.name, player.x, player.y);
+        drawLabel(player.name, player.message, player.x, player.y);
+    } else {
+        // Fallback: Draw a pink square if player image fails
+        ctx.fillStyle = "#ff8fb1";
+        ctx.fillRect(player.x - game.cameraX - 10, player.y - 20, 20, 20);
     }
 
     requestAnimationFrame(loop);
 }
 
-// Helper: Draw Username Labels
-function drawLabel(name, x, y) {
+function drawLabel(name, message, x, y) {
+    const screenX = x - game.cameraX;
+    
+    // Speech Bubble
+    if (message) {
+        ctx.font = "14px Arial";
+        const tw = ctx.measureText(message).width;
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "#ff8fb1";
+        ctx.beginPath();
+        ctx.roundRect(screenX - (tw/2) - 10, y - player.height - 40, tw + 20, 30, 10);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "black";
+        ctx.fillText(message, screenX, y - player.height - 20);
+    }
+
+    // Name
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     ctx.strokeStyle = "black";
     ctx.lineWidth = 3;
-    ctx.strokeText(name, x - game.cameraX, y + 20);
-    ctx.fillText(name, x - game.cameraX, y + 20);
+    ctx.strokeText(name, screenX, y + 20);
+    ctx.fillText(name, screenX, y + 20);
 }
 
-// 9. UI Button Listeners
-document.getElementById('inv-btn').addEventListener('click', () => alert("Inventory ✨"));
-document.getElementById('map-btn').addEventListener('click', () => alert("Map 🌸"));
+// 9. UI Buttons
 document.getElementById('set-btn').addEventListener('click', () => {
-    if(confirm("Log out?")) {
-        // Clean up: Remove your character from the map when you leave
-        db.collection("active_players").doc(player.id).delete().then(() => {
-            auth.signOut();
-        });
+    if(confirm("Logout?")) {
+        db.collection("active_players").doc(player.id).delete().then(() => auth.signOut());
     }
 });

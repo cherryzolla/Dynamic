@@ -17,7 +17,10 @@
             <img src="assets/ui/loading.gif" style="width: 80px;">
             <p style="font-family: sans-serif; color: #ff8fb1; font-weight: bold;">Entering Prism...</p>
         </div>
-
+        <div id="chat-container" style="position: absolute; bottom: 70px; width: 100%; display: flex; justify-content: center; z-index: 20; pointer-events: none;">
+    <input type="text" id="chat-input" placeholder="Type to chat..." maxlength="50" 
+        style="pointer-events: auto; width: 300px; padding: 8px; border-radius: 20px; border: 2px solid #ff8fb1; outline: none; font-family: 'Quicksand', sans-serif; background: rgba(255, 255, 255, 0.9);">
+</div>
         <canvas id="prismCanvas" width="800" height="494"></canvas>
 
         <div class="ui-bar" style="position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: center; gap: 20px; pointer-events: none;">
