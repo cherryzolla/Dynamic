@@ -14,17 +14,21 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // --- AUTH OBSERVER ---
+// This watches if someone logs in and decides where to send them
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // Check if user already has a gender/character set up
+        // Check if this user already picked a gender
         db.collection("users").doc(user.uid).get().then(doc => {
             if (doc.exists && doc.data().gender) {
-                window.location.href = "play.html"; // Already has a character? Go to game.
+                // If they have a character, send them to the game!
+                window.location.href = "play.html"; 
             } else {
-                showCharacterCreator(); // New user? Show the picker.
+                // If they are new, show the Character Picker
+                showCharacterCreator();
             }
         });
     } else {
+        // If logged out, show the login page
         document.getElementById('auth-page').style.display = 'block';
     }
 });
@@ -50,8 +54,10 @@ function toggleAuth(mode) {
 }
 
 function showCharacterCreator() {
-    document.getElementById('auth-fields').style.display = 'none'; // Hide login/register
-    document.getElementById('char-setup').style.display = 'block'; // Show Boy/Girl picker
+    // Hide the email/password fields
+    document.getElementById('auth-fields').style.display = 'none'; 
+    // Show the Boy/Girl selection cards
+    document.getElementById('char-setup').style.display = 'block'; 
 }
 
 // --- REGISTER & LOGIN ---
@@ -67,7 +73,8 @@ function register() {
     auth.createUserWithEmailAndPassword(email, pass)
         .then(() => {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            showCharacterCreator(); // Immediately show character creator after register
+            // Instead of enterApp(), we show the Character Creator
+            showCharacterCreator(); 
         })
         .catch(err => alert(err.message));
 }
@@ -75,35 +82,44 @@ function register() {
 function login() {
     const email = document.getElementById('email').value.trim();
     const pass = document.getElementById('pass').value;
+    
     auth.signInWithEmailAndPassword(email, pass)
         .catch(err => alert(err.message));
-    // Observer handles redirection to play.html
+    // Note: The Auth Observer at the top handles the redirect to play.html automatically!
 }
 
 function logout() {
-    auth.signOut().then(() => window.location.href = "index.html");
+    auth.signOut().then(() => {
+        window.location.href = "index.html";
+    });
 }
 
-// --- CHARACTER SELECTION ---
+// --- CHARACTER SELECTION LOGIC ---
 let chosenGender = null;
 
 function selectGender(gender) {
     chosenGender = gender;
+    
+    // Highlight the selection
     document.getElementById('option-f').classList.remove('selected');
     document.getElementById('option-m').classList.remove('selected');
     document.getElementById(`option-${gender.toLowerCase()}`).classList.add('selected');
+    
+    // Show the "Confirm" button
     document.getElementById('enter-btn').style.display = 'inline-block';
 }
 
 async function confirmCharacter() {
     if (!chosenGender) return;
+    
     const user = auth.currentUser;
-    const username = document.getElementById('userName').value || "Traveler";
+    const username = document.getElementById('userName').value || "New Traveler";
 
+    // Save their base identity to Firestore
     await db.collection("users").doc(user.uid).set({
         username: username,
         gender: chosenGender,
-        stars: 1000,
+        stars: 1000, 
         level: 1,
         currentOutfit: {
             body: chosenGender === 'F' ? 'body_f' : 'body_m',
@@ -112,5 +128,6 @@ async function confirmCharacter() {
         }
     });
 
+    // Take them to the world!
     window.location.href = "play.html";
 }
