@@ -2,108 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Prism | Downtown</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Prism | Play</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        #game-wrapper { position: relative; width: 800px; height: 494px; border: 4px solid #000; background: #87CEEB; }
-        #ui-bar { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: center; gap: 10px; z-index: 100; }
-        .ui-btn { width: 50px; height: 50px; cursor: pointer; border: none; background: transparent; }
-        .ui-btn img { width: 100%; height: 100%; }
-        #chat-container { width: 300px; background: rgba(0,0,0,0.6); border-radius: 20px; padding: 5px 15px; display: flex; }
-        #chat-input { background: transparent; border: none; color: white; width: 100%; outline: none; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-<body>
+<body style="background: #1a1a1a; margin: 0; overflow: hidden;">
 
-    <div id="game-wrapper">
-        <div id="game-container">
-    <div id="game-loader" style="position: absolute; inset: 0; background: #fff5f8; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.8s ease;">
-        <img src="assets/ui/loading.gif" style="width: 100px;">
-        <p id="load-status" style="font-family: 'Quicksand'; color: #ff8fb1; margin-top: 10px; font-weight: bold;">Connecting to Prism...</p>
-    </div>
+    <div id="game-container" style="position: relative; width: 800px; height: 494px; margin: 50px auto; border: 4px solid #000;">
+        
+        <div id="game-loader" style="position: absolute; inset: 0; background: #fff5f8; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.8s ease;">
+            <img src="assets/ui/loading.gif" style="width: 100px;">
+            <p id="load-status" style="font-family: 'Quicksand'; color: #ff8fb1; margin-top: 10px; font-weight: bold;">Connecting...</p>
+        </div>
+
         <canvas id="gameCanvas" width="800" height="494"></canvas>
 
-        <div id="ui-bar">
-            <button class="ui-btn" onclick="toggleInventory()"><img src="assets/ui/fntg-ui-button-inventory.png"></button>
-            <div id="chat-container">
-                <input type="text" id="chat-input" placeholder="Type to chat..." onkeydown="if(event.key==='Enter') handleChat()">
-            </div>
-            <button class="ui-btn" onclick="logout()"><img src="assets/ui/fntg-ui-button-settings.png"></button>
+        <div class="ui-bar" style="position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; pointer-events: none;">
+            <img src="assets/ui/inventory_icon.png" class="hanger-btn" style="width: 50px; cursor: pointer; pointer-events: auto;">
+            <input type="text" class="chat-input" placeholder="Type to chat..." style="width: 300px; pointer-events: auto;">
+            <img src="assets/ui/settings_icon.png" class="settings-btn" style="width: 50px; cursor: pointer; pointer-events: auto;">
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="./assets.js"></script>
-    <script src="./inventory.js"></script>
-    <script src="./engine.js"></script>
+    <script src="assets.js"></script>
+    <script src="engine.js"></script>
+
     <script>
-    // 1. Initialize Firebase first so everything else works
-    const firebaseConfig = {
-        apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
-        authDomain: "dynamic-40949.firebaseapp.com",
-        projectId: "dynamic-40949",
-        storageBucket: "dynamic-40949.firebasestorage.app",
-        messagingSenderId: "377647789786",
-        appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3"
-    };
+        // 1. Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
+            authDomain: "dynamic-40949.firebaseapp.com",
+            projectId: "dynamic-40949",
+            storageBucket: "dynamic-40949.firebasestorage.app",
+            messagingSenderId: "377647789786",
+            appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+        // 2. Auth Watcher
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.collection("users").doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        initEngine(doc.data()); // Start the Engine!
+                    }
+                });
+            } else {
+                window.location.href = "index.html"; // No user? Go back home.
+            }
+        });
 
-    // 2. Wait for the user, then start the engine
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            db.collection("users").doc(user.uid).get().then(doc => {
-                if (doc.exists) {
-                    initEngine(doc.data());
-                }
-            });
-        } else {
-            window.location.href = "index.html";
-        }
-    });
+        // 3. ⚙️ Logout Logic
+        document.querySelector('.settings-btn').addEventListener('click', () => {
+            if(confirm("Log out of Dynamic?")) {
+                auth.signOut().then(() => { window.location.href = "index.html"; });
+            }
+        });
 
-    // 3. Connect the Buttons (The "Wiring")
-    document.querySelector('.hanger-btn').addEventListener('click', () => {
-        if (typeof toggleInventory === "function") toggleInventory();
-    });
-
-    document.querySelector('.settings-btn').addEventListener('click', () => {
-        const confirmLogout = confirm("Do you want to logout?");
-        if (confirmLogout) {
-            auth.signOut().then(() => { window.location.href = "index.html"; });
-        }
-    });
-
-    // 4. Chatbox Logic
-    const chatInput = document.querySelector('.chat-input');
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && chatInput.value.trim() !== "") {
-            sendChat(chatInput.value); // This function is in engine.js
-            chatInput.value = ""; 
-        }
-    });
-    // ⚙️ Settings / Logout Logic
-const settingsBtn = document.querySelector('.settings-btn'); // Make sure your HTML has class="settings-btn"
-
-if (settingsBtn) {
-    settingsBtn.addEventListener('click', () => {
-        const confirmLogout = confirm("Are you sure you want to leave Dynamic Prism?");
-        
-        if (confirmLogout) {
-            auth.signOut().then(() => {
-                console.log("Logged out successfully!");
-                window.location.href = "index.html"; // Teleport back to login
-            }).catch((error) => {
-                console.error("Logout Error:", error);
-            });
-        }
-    });
-}
-</script>
+        // 4. 👗 Inventory Logic
+        document.querySelector('.hanger-btn').addEventListener('click', () => {
+            alert("Inventory coming soon! ✨"); 
+        });
+    </script>
 </body>
 </html>
