@@ -1,4 +1,4 @@
-// --- CONFIG & INIT ---
+// DONOTDELETETHISEVEROMG
 const firebaseConfig = {
   apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
   authDomain: "dynamic-40949.firebaseapp.com",
@@ -12,7 +12,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-// ... (Your Firebase Config stays here at the top) ...
 
 async function confirmCharacter() {
     if (!chosenGender) return;
@@ -42,9 +41,7 @@ async function confirmCharacter() {
     }
 }
 
-// ... (Rest of your login/register functions) ...
-// --- AUTH OBSERVER ---
-// This watches if someone logs in and decides where to send them
+
 auth.onAuthStateChanged((user) => {
     if (user) {
         // Check if this user already picked a gender
@@ -58,12 +55,10 @@ auth.onAuthStateChanged((user) => {
             }
         });
     } else {
-        // If logged out, show the login page
         document.getElementById('auth-page').style.display = 'block';
     }
 });
 
-// --- UI HELPERS ---
 function toggleAuth(mode) {
     const nameField = document.getElementById('name-field');
     const loginActions = document.getElementById('login-actions');
@@ -84,13 +79,11 @@ function toggleAuth(mode) {
 }
 
 function showCharacterCreator() {
-    // Hide the email/password fields
+    
     document.getElementById('auth-fields').style.display = 'none'; 
-    // Show the Boy/Girl selection cards
     document.getElementById('char-setup').style.display = 'block'; 
 }
 
-// --- REGISTER & LOGIN ---
 function register() {
     const name = document.getElementById('userName').value;
     const invite = document.getElementById('inviteCode').value.trim();
@@ -115,7 +108,6 @@ function login() {
     
     auth.signInWithEmailAndPassword(email, pass)
         .catch(err => alert(err.message));
-    // Note: The Auth Observer at the top handles the redirect to play.html automatically!
 }
 
 function logout() {
@@ -124,18 +116,18 @@ function logout() {
     });
 }
 
-// --- CHARACTER SELECTION LOGIC ---
+
 let chosenGender = null;
 
 function selectGender(gender) {
     chosenGender = gender;
     
-    // Highlight the selection
+    
     document.getElementById('option-f').classList.remove('selected');
     document.getElementById('option-m').classList.remove('selected');
     document.getElementById(`option-${gender.toLowerCase()}`).classList.add('selected');
     
-    // Show the "Confirm" button
+    
     document.getElementById('enter-btn').style.display = 'inline-block';
 }
 
@@ -145,7 +137,6 @@ async function confirmCharacter() {
     const user = auth.currentUser;
     const username = document.getElementById('userName').value || "New Traveler";
 
-    // Save their base identity to Firestore
     await db.collection("users").doc(user.uid).set({
         username: username,
         gender: chosenGender,
@@ -157,7 +148,5 @@ async function confirmCharacter() {
             tops: 'none'
         }
     });
-
-    // Take them to the world!
     window.location.href = "play.html";
 }

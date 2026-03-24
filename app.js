@@ -3,7 +3,7 @@ function enterApp() {
     document.getElementById('auth-page').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
     loadUserData();
-    loadDumps(); // Pulls your thoughts from the cloud
+    loadDumps(); 
 }
 
 function show(pageId) {
@@ -22,7 +22,7 @@ function loadUserData() {
     }
 }
 
-let thoughts = []; // Array to store your ideas as objects
+let thoughts = []; 
 
 function addDump() {
     const text = document.getElementById('dumpIn').value;
@@ -71,7 +71,6 @@ function drawThought(ctx, text, x, y) {
     ctx.font = "700 14px 'Quicksand'";
     const tw = ctx.measureText(text).width;
     
-    // The "Sticker" Look
     ctx.fillStyle = "white";
     ctx.strokeStyle = "#2d2d2d";
     ctx.lineWidth = 3;
@@ -80,7 +79,6 @@ function drawThought(ctx, text, x, y) {
     ctx.fill();
     ctx.stroke();
 
-    // The Text
     ctx.fillStyle = "#2d2d2d";
     ctx.fillText(text, x, y);
 }

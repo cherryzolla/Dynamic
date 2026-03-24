@@ -1,4 +1,4 @@
-// 1. Firebase Configuration
+
 const firebaseConfig = {
     apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
     authDomain: "dynamic-40949.firebaseapp.com",
@@ -12,11 +12,10 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 2. Setup Canvas
 const canvas = document.getElementById('prismCanvas');
 const ctx = canvas.getContext('2d');
 
-// 3. Game State
+
 let game = {
     active: false,
     cameraX: 0,
@@ -36,12 +35,9 @@ let player = {
 };
 
 let otherPlayers = {}; 
-
-// 4. Asset Setup 
-// IMPORTANT: Check your actual filenames! GitHub is case-sensitive.
 game.bg.src = "assets/rooms/Fantage_Downtown_BareBones.png";
 
-// 5. Auth & Data Fetching
+
 auth.onAuthStateChanged(user => {
     if (user) {
         player.id = user.uid;
@@ -62,7 +58,7 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// 6. Multiplayer Listener
+
 function startMultiplayer() {
     db.collection("active_players").onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
@@ -87,7 +83,7 @@ function startMultiplayer() {
     });
 }
 
-// 7. Input & Chat
+
 canvas.addEventListener('mousedown', (e) => {
     const rect = canvas.getBoundingClientRect();
     player.targetX = (e.clientX - rect.left) + game.cameraX;
@@ -116,17 +112,17 @@ function startGame() {
     loop();
 }
 
-// 8. Main Loop
+
 function loop() {
     if (!game.active) return;
     game.frameCount++;
 
-    // Movement
+    
     player.x += (player.targetX - player.x) * 0.12;
     player.y += (player.targetY - player.y) * 0.12;
     game.cameraX = player.x - canvas.width / 2;
 
-    // Sync to Firebase
+    
     if (player.id && game.frameCount % 6 === 0) {
         db.collection("active_players").doc(player.id).set({
             x: Math.round(player.x),
@@ -138,10 +134,10 @@ function loop() {
         }, { merge: true });
     }
 
-    // --- RENDER ---
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw BG with Safety Gate
+    
     if (game.bg.complete && game.bg.naturalWidth !== 0) {
         ctx.drawImage(game.bg, -game.cameraX, 0);
     } else {
@@ -149,7 +145,7 @@ function loop() {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Draw Others
+    
     Object.keys(otherPlayers).forEach(id => {
         const p = otherPlayers[id];
         if (p.img && p.img.complete && p.img.naturalWidth !== 0) {
@@ -158,12 +154,11 @@ function loop() {
         }
     });
 
-    // Draw Self
+    
     if (player.img.complete && player.img.naturalWidth !== 0) {
         ctx.drawImage(player.img, player.x - game.cameraX - (player.width/2), player.y - player.height, player.width, player.height);
         drawLabel(player.name, player.message, player.x, player.y);
     } else {
-        // Fallback: Draw a pink square if player image fails
         ctx.fillStyle = "#ff8fb1";
         ctx.fillRect(player.x - game.cameraX - 10, player.y - 20, 20, 20);
     }
@@ -187,7 +182,7 @@ function drawLabel(name, message, x, y) {
         ctx.fillText(message, screenX, y - player.height - 20);
     }
 
-    // Name
+    
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
@@ -197,7 +192,6 @@ function drawLabel(name, message, x, y) {
     ctx.fillText(name, screenX, y + 20);
 }
 
-// 9. UI Buttons
 document.getElementById('set-btn').addEventListener('click', () => {
     if(confirm("Logout?")) {
         db.collection("active_players").doc(player.id).delete().then(() => auth.signOut());
