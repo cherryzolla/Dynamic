@@ -25,11 +25,30 @@ let player = {
     id: null,
     x: 400, y: 380,
     targetX: 400, targetY: 380,
-    width: 60, height: 95,
+    width: 60, height: 95, 
+    frameW: 100, // Change this to your actual sprite frame width
+    frameH: 100, // Change this to your actual sprite frame height
+    currFrame: 0, // 0=Stand, 1=Walk, etc.
     name: "User",
     gender: "F",
     message: "",
-    img: new Image()
+    isWearingCostume: false,
+    equipment: {
+        board: new Image(),
+        pet: new Image(),
+        body: new Image(),
+        bottoms: new Image(),
+        tops: new Image(),
+        shoes: new Image(),
+        face: new Image(),
+        faceAcc: new Image(),
+        hair: new Image(),
+        headAcc: new Image(),
+        bodyAcc: new Image(),
+        moodie: new Image(),
+        friendship: new Image(),
+        costume: new Image()
+    }
 };
 
 let otherPlayers = {}; 
@@ -44,9 +63,9 @@ auth.onAuthStateChanged(user => {
             player.name = data.username || "Traveler";
             player.gender = data.gender || "F";
             
-            player.img.src = player.gender === "M" ? 
-                "assets/items/boy/body/fantage-boy-outline.png" : 
-                "assets/items/girl/body/fantage-girl-outline.png";
+            const skinNum = data.skinTone || 1;
+            player.equipment.body.src = `assets/items/${player.gender.toLowerCase()}/body/orig-body-${skinNum}_orig.png`;
+            player.equipment.face.src = `assets/items/${player.gender.toLowerCase()}/body/orig-face-${skinNum}_orig.png`;
             
             startMultiplayer();
             startGame();
@@ -67,14 +86,15 @@ function startMultiplayer() {
                 delete otherPlayers[id];
             } else {
                 if (!otherPlayers[id]) {
-                    otherPlayers[id] = { ...data, img: new Image() };
-                    otherPlayers[id].img.src = data.gender === "M" ? 
-                        "assets/items/boy/body/fantage-boy-outline.png" : 
-                        "assets/items/girl/body/fantage-girl-outline.png";
+                    otherPlayers[id] = { 
+                        ...data, 
+                        equipment: {} 
+                    };
                 }
                 otherPlayers[id].x = data.x;
                 otherPlayers[id].y = data.y;
                 otherPlayers[id].message = data.message || "";
+                otherPlayers[id].currFrame = data.currFrame || 0;
             }
         });
     });
@@ -93,15 +113,11 @@ if(chatInput) {
             const msg = chatInput.value;
             player.message = msg;
             chatInput.value = "";
-            
             db.collection("active_players").doc(player.id).update({ message: msg });
-            
             setTimeout(() => {
                 player.message = "";
-                if(player.id) {
-                    db.collection("active_players").doc(player.id).update({ message: "" });
-                }
-            }, 10000); 
+                if(player.id) db.collection("active_players").doc(player.id).update({ message: "" });
+            }, 10000);
         }
     });
 }
@@ -125,6 +141,7 @@ function loop() {
         db.collection("active_players").doc(player.id).set({
             x: Math.round(player.x),
             y: Math.round(player.y),
+            currFrame: player.currFrame,
             name: player.name,
             gender: player.gender,
             message: player.message,
@@ -139,24 +156,46 @@ function loop() {
     }
 
     Object.keys(otherPlayers).forEach(id => {
-        const p = otherPlayers[id];
-        if (p.img && p.img.complete) {
-            ctx.drawImage(p.img, p.x - game.cameraX - (player.width/2), p.y - player.height, player.width, player.height);
-            drawLabel(p.name, p.message, p.x, p.y);
-        }
+        drawCharacter(otherPlayers[id]);
     });
 
-    if (player.img.complete && player.img.naturalWidth !== 0) {
-        ctx.drawImage(player.img, player.x - game.cameraX - (player.width/2), player.y - player.height, player.width, player.height);
-        drawLabel(player.name, player.message, player.x, player.y);
-    }
+    drawCharacter(player);
 
     requestAnimationFrame(loop);
 }
 
+function drawCharacter(p) {
+    const px = p.x - game.cameraX - (player.width / 2);
+    const py = p.y - player.height;
+
+    if (p.isWearingCostume && p.equipment.costume?.src) {
+        renderLayer(p.equipment.board, px, py, p.currFrame);
+        renderLayer(p.equipment.pet, px, py, p.currFrame);
+        renderLayer(p.equipment.costume, px, py, p.currFrame);
+    } else {
+        const backLayers = ['board', 'pet'];
+        const frontLayers = ['body', 'bottoms', 'tops', 'shoes', 'face', 'faceAcc', 'hair', 'headAcc', 'bodyAcc', 'moodie', 'friendship'];
+        
+        backLayers.forEach(layer => renderLayer(p.equipment[layer], px, py, p.currFrame));
+        frontLayers.forEach(layer => renderLayer(p.equipment[layer], px, py, p.currFrame));
+    }
+
+    drawLabel(p.name, p.message, p.x, p.y);
+}
+
+function renderLayer(imgObj, x, y, frame) {
+    if (!imgObj || !imgObj.complete || !imgObj.src) return;
+    ctx.drawImage(
+        imgObj,
+        frame * player.frameW, 0, 
+        player.frameW, player.frameH,
+        x, y, 
+        player.width, player.height
+    );
+}
+
 function drawLabel(name, message, x, y) {
     const screenX = x - game.cameraX;
-    
     if (message) {
         ctx.font = "14px Arial";
         const tw = ctx.measureText(message).width;
@@ -168,7 +207,6 @@ function drawLabel(name, message, x, y) {
         ctx.textAlign = "center";
         ctx.fillText(message, screenX, y - player.height - 25);
     }
-
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
@@ -193,3 +231,20 @@ document.getElementById('set-btn').addEventListener('click', () => {
 window.addEventListener("beforeunload", () => {
     if (player.id) db.collection("active_players").doc(player.id).delete();
 });
+// 🎒 OPEN INVENTORY
+const invBtn = document.getElementById('inv-btn');
+const invWindow = document.getElementById('inventory-window');
+const closeInv = document.getElementById('close-inv');
+
+if (invBtn) {
+    invBtn.addEventListener('click', () => {
+        invWindow.style.display = (invWindow.style.display === 'none') ? 'block' : 'none';
+    });
+}
+
+// ❌ CLOSE INVENTORY
+if (closeInv) {
+    closeInv.addEventListener('click', () => {
+        invWindow.style.display = 'none';
+    });
+}

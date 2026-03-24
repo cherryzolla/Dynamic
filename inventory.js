@@ -1,35 +1,33 @@
 let inventoryOpen = false;
 
 function toggleInventory() {
+    const invWindow = document.getElementById('inventory-window');
+    if (!invWindow) return;
+
     inventoryOpen = !inventoryOpen;
-    console.log("Inventory is now: " + (inventoryOpen ? "Open" : "Closed"));
-    
-    // For now, let's just alert, but eventually this will pop up a UI
-    if (inventoryOpen) {
-        showInventoryUI();
-    } else {
-        hideInventoryUI();
-    }
+    invWindow.style.display = inventoryOpen ? "block" : "none";
 }
 
 function showInventoryUI() {
-    // You can create a div overlay here later 🌸
-    alert("Opening your Dynamic Prism closet...");
+    // This is handled by toggleInventory now, 
+    // but you can add a "Pop" sound effect here later! 🌸
 }
 
 function hideInventoryUI() {
-    // Logic to close the closet
+    inventoryOpen = false;
+    document.getElementById('inventory-window').style.display = "none";
 }
 
-// Function to "Equip" an item
 function equipItem(itemId) {
     const item = ITEM_DATABASE[itemId];
     if (!item) return;
 
-    player.currentOutfit[item.layer] = itemId;
-    
-    // Save to Firebase so other players see your new look
-    db.collection("users").doc(auth.currentUser.uid).update({
-        ["currentOutfit." + item.layer]: itemId
+    // Update the local player image objects
+    // Assuming your core.js equipment object uses Image() objects
+    player.equipment[item.layer].src = item.spritePath;
+
+    // Save to Firebase
+    db.collection("active_players").doc(player.id).update({
+        ["equipment." + item.layer]: item.spritePath
     });
 }
