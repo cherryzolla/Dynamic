@@ -197,34 +197,142 @@ canvas {
     background: #ff8fb1;
     border-color: #000;
 }
+/* THE MAIN CASE: Combined #id-fone-overlay and .idfone-container */
 #id-fone-overlay {
-    display: none;
+    display: none; /* Hidden until Firebase click */
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 300px;
-    background-color: #f5f5dc; /* Beige */
-    border: 5px solid #800080; /* Purple */
-    border-radius: 30px; /* Bubbly corners */
-    padding: 20px;
-    box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
-    font-family: 'Arial', sans-serif;
-    z-index: 1000;
+    
+    /* Dimensions & Background */
+    width: 580px;
+    height: 420px;
+    background: #FDF2D5; /* Beige/Cream from image */
+    
+    /* The Signature Thick Pink/Coral Border */
+    border: 12px solid #FF7F7F; 
+    border-radius: 30px;
+    
+    padding: 15px;
+    z-index: 10000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
 }
 
-.idfone-header {
-    background-color: #d2042d; /* Cherry Red */
-    color: white;
-    padding: 10px;
-    border-radius: 15px;
-    text-align: center;
-    font-weight: bold;
+/* TOP STATS BAR (S, e, G) */
+.idfone-stats-row {
+    display: flex;
+    justify-content: space-around;
+    background: #FFF9C4; /* Yellowish gold */
+    border-radius: 20px;
+    padding: 8px;
     margin-bottom: 15px;
+    border: 2px solid #EED79B;
 }
 
-.idfone-stats {
-    color: #4b0082; /* Deep Purple text */
-    font-size: 14px;
-    line-height: 1.6;
+.idfone-stat-item {
+    color: #4b0082; /* Deep Purple text for numbers */
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* MAIN LAYOUT SECTION */
+.idfone-main {
+    display: flex;
+    justify-content: space-between;
+}
+
+.idfone-left, .idfone-right {
+    width: 48%;
+}
+
+/* LEFT SIDE: Name, Rank, and Character */
+.idfone-name-text {
+    font-size: 22px;
+    color: #3C221D; /* Dark Brown */
+    font-weight: bold;
+    margin: 0;
+}
+
+.idfone-rank-text {
+    color: #D2042D; /* Cherry Red */
+    font-weight: bold;
+    font-style: italic;
+    margin: 2px 0;
+}
+
+.idfone-avatar-box {
+    width: 100%;
+    height: 160px;
+    background: #B3E5FC; /* Sky Blue character background */
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    border: 3px solid #FFF;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* RIGHT SIDE: Profile Rows */
+.idfone-profile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #EED79B;
+    padding: 10px 0;
+    color: #4b0082; /* Purple text */
+    font-weight: bold;
+}
+
+.idfone-label {
+    color: #D2042D; /* Cherry Red for labels like "Mood:" */
+}
+
+/* BUTTONS */
+.idfone-blue-btn {
+    background: #0091EA;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #007BB5;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.idfone-blue-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #007BB5;
+}
+
+/* BOTTOM APP NAVIGATION BAR */
+.idfone-nav-bar {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    height: 75px;
+    background: #37474F; /* Dark Slate Gray bar */
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    color: white;
+    font-size: 11px;
+}
+
+.idfone-app { 
+    text-align: center; 
+    cursor: pointer; 
+    line-height: 1.2;
+}
+
+.idfone-app b {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 2px;
 }

@@ -1,5 +1,4 @@
 // idfone.js
-// No imports needed!
 async function openIdFone(userId) {
     // It will find the 'db' we attached to the window in core.js
     const userRef = window.db.collection("users").doc(userId);

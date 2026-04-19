@@ -15,6 +15,7 @@ window.db = db;
 // Main Game Canvas
 const mainCanvas = document.getElementById('prismCanvas');
 const ctx = mainCanvas.getContext('2d'); 
+const canvas = mainCanvas;
 
 // Inventory Preview Canvas
 const previewCanvas = document.getElementById('previewCanvas');
@@ -97,6 +98,53 @@ mainCanvas.addEventListener('mousedown', (e) => {
     player.targetX = (e.clientX - rect.left) + game.cameraX;
     player.targetY = (e.clientY - rect.top);
 });
+// Add this to your main script
+prismCanvas.addEventListener('mousedown', (e) => {
+    const rect = prismCanvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    // Use your player variable name (player, localPlayer, etc.)
+    const screenX = player.x - (window.gameCameraX || 0);
+    const screenY = player.y;
+
+    const dx = mouseX - screenX;
+    const dy = mouseY - (screenY - 45); 
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < 50) {
+        // Instead of the red box, we call the IdFone!
+        openMyIdFone();
+    }
+});
+function openMyIdFone() {
+    const fone = document.getElementById("id-fone-overlay");
+    
+    // Fill it with your "perfect" character's info
+    fone.innerHTML = `
+        <div class="idfone-wrapper">
+            <div class="idfone-header">
+                <span>${player.username || "Player"}</span>
+            </div>
+            <div class="idfone-body">
+                <div class="idfone-stats">
+                    <p>Level: ${player.level || 1}</p>
+                    <p>Stars: ${player.stars || 0}</p>
+                </div>
+                <div class="idfone-bio">
+                    ${player.bio || "Building something cool..."}
+                </div>
+                <button class="idfone-btn" onclick="closeIdFone()">CLOSE</button>
+            </div>
+        </div>
+    `;
+    
+    fone.style.display = "block";
+}
+
+function closeIdFone() {
+    document.getElementById("id-fone-overlay").style.display = "none";
+}
 
 // 4. MAIN LOOP
 function loop() {
@@ -196,7 +244,31 @@ function startGame() {
     game.active = true;
     loop();
 }
+async function openIdFone(userId) {
+    // Since we did 'window.db = db' earlier, we use that here
+    const userRef = window.db.collection("users").doc(userId);
+    const doc = await userRef.get();
 
+    if (doc.exists) {
+        const data = doc.data();
+        const fone = document.getElementById("id-fone-overlay");
+
+        // Inject the data into your HTML structure
+        fone.innerHTML = `
+            <div class="idfone-container">
+                <div class="idfone-header">${data.username}</div>
+                <div class="idfone-content">
+                    <p>Level: ${data.level || 1}</p>
+                    <p>Stars: ${data.stars || 0}</p>
+                    <p class="bio">${data.bio || "No bio set."}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.style.display='none'">Close</button>
+            </div>
+        `;
+        
+        fone.style.display = "block";
+    }
+}
 window.addEventListener("beforeunload", () => {
     if (player.id) db.collection("active_players").doc(player.id).delete();
 });
