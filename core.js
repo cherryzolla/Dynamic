@@ -9,6 +9,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+// Attach it to the window so idfone.js can "see" it
+window.db = db;
 
 // Main Game Canvas
 const mainCanvas = document.getElementById('prismCanvas');

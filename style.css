@@ -197,3 +197,34 @@ canvas {
     background: #ff8fb1;
     border-color: #000;
 }
+#id-fone-overlay {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    background-color: #f5f5dc; /* Beige */
+    border: 5px solid #800080; /* Purple */
+    border-radius: 30px; /* Bubbly corners */
+    padding: 20px;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+    font-family: 'Arial', sans-serif;
+    z-index: 1000;
+}
+
+.idfone-header {
+    background-color: #d2042d; /* Cherry Red */
+    color: white;
+    padding: 10px;
+    border-radius: 15px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.idfone-stats {
+    color: #4b0082; /* Deep Purple text */
+    font-size: 14px;
+    line-height: 1.6;
+}
