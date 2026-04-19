@@ -138,7 +138,19 @@ input, textarea {
     border-radius: 20px;
     padding: 15px;
 }
-
+#prismCanvas {
+    /* This keeps pixel art sharp when scaling */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+canvas {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
 .char-preview-bg {
     background: #fdf2f5; /* Soft beige-pink */
     border-radius: 15px;

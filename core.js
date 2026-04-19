@@ -6,270 +6,204 @@ const firebaseConfig = {
     messagingSenderId: "377647789786",
     appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const canvas = document.getElementById('prismCanvas');
-const ctx = canvas.getContext('2d');
+// Main Game Canvas
+const mainCanvas = document.getElementById('prismCanvas');
+const ctx = mainCanvas.getContext('2d'); 
 
-let game = {
-    active: false,
-    cameraX: 0,
-    bg: new Image(),
-    frameCount: 0
-};
+// Inventory Preview Canvas
+const previewCanvas = document.getElementById('previewCanvas');
+const pCtx = previewCanvas.getContext('2d');
+
+let game = { active: false, cameraX: 0, bg: new Image(), frameCount: 0 };
+game.bg.src = "assets/rooms/Fantage_Downtown_BareBones.png";
 
 let player = {
-    id: null,
-    x: 400, y: 380,
-    targetX: 400, targetY: 380,
-    width: 60, height: 95, 
-    frameW: 100, 
-    frameH: 100, 
-    currFrame: 0, 
-    name: "User",
-    gender: "F",
-    message: "",
-    isWearingCostume: false,
-    equipment: {
-        board: new Image(),
-        pet: new Image(),
-        body: new Image(),
-        bottoms: new Image(),
-        tops: new Image(),
-        shoes: new Image(),
-        face: new Image(),
-        faceAcc: new Image(),
-        hair: new Image(),
-        headAcc: new Image(),
-        bodyAcc: new Image(),
-        moodie: new Image(),
-        friendship: new Image(),
-        costume: new Image()
-    }
+    id: null, x: 400, y: 380, targetX: 400, targetY: 380,
+    width: 60, height: 95, name: "User", gender: "F",
+    equipment: { body: new Image(), face: new Image() }
 };
 
 let otherPlayers = {}; 
 
-game.bg.src = "assets/rooms/Fantage_Downtown_BareBones.png";
-
+// 1. AUTH & DATA LOAD
 auth.onAuthStateChanged(user => {
     if (user) {
         player.id = user.uid;
         db.collection("users").doc(user.uid).get().then(doc => {
             const data = doc.data() || {};
             player.name = data.username || "Traveler";
-            player.gender = data.gender || "F";
             
-            const skinNum = data.skinTone || 1;
-            const genderPath = player.gender.toLowerCase();
-            
-            let suffix = (player.gender === "M") ? `-${skinNum}` : "";
-            
-            player.equipment.body.src = `assets/items/${genderPath}/body/orig-body-${skinNum}${suffix}_orig.png`;
-            player.equipment.face.src = `assets/items/${genderPath}/body/orig-face-${skinNum}${suffix}_orig.png`;
-            
+            let g = data.gender ? data.gender.toUpperCase() : "F";
+            player.gender = (g === "M" || g === "BOY") ? "M" : "F";
+
+            if (player.gender === "M") {
+                player.equipment.body.src = `assets/items/boy/body/orig-body-1-1_orig.png`; 
+                player.equipment.face.src = `assets/items/boy/body/orig-face-1-1_orig.png`;
+            } else {
+                player.equipment.body.src = `assets/items/girl/body/orig-body-1_orig.png`;
+                player.equipment.face.src = `assets/items/girl/body/orig-face-1_orig.png`;
+            }
+
             startMultiplayer();
             startGame();
-        }).catch(err => console.error("Error fetching user:", err));
+        });
     } else {
         window.location.href = "index.html";
     }
 });
 
+// 2. MULTIPLAYER SNAPSHOTS
 function startMultiplayer() {
-    db.collection("active_players").onSnapshot(snapshot => {
+    db.collection("active_players")
+      .where(firebase.firestore.FieldPath.documentId(), "!=", player.id)
+      .onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
-            const data = change.doc.data();
             const id = change.doc.id;
-            if (id === player.id) return;
-
+            const data = change.doc.data();
+            
             if (change.type === "removed") {
                 delete otherPlayers[id];
             } else {
                 if (!otherPlayers[id]) {
                     otherPlayers[id] = { 
                         ...data, 
-                        equipment: {
-                            board: new Image(), pet: new Image(), body: new Image(),
-                            bottoms: new Image(), tops: new Image(), shoes: new Image(),
-                            face: new Image(), faceAcc: new Image(), hair: new Image(),
-                            headAcc: new Image(), bodyAcc: new Image(), moodie: new Image(),
-                            friendship: new Image(), costume: new Image()
-                        } 
+                        equipment: { body: new Image(), face: new Image() } 
                     };
                 }
                 otherPlayers[id].x = data.x;
                 otherPlayers[id].y = data.y;
-                otherPlayers[id].message = data.message || "";
-                otherPlayers[id].currFrame = data.currFrame || 0;
-                otherPlayers[id].isWearingCostume = data.isWearingCostume || false;
+                otherPlayers[id].name = data.name;
                 
-                if (data.equipmentPaths) {
-                    Object.keys(data.equipmentPaths).forEach(layer => {
-                        if (otherPlayers[id].equipment[layer]) {
-                            otherPlayers[id].equipment[layer].src = data.equipmentPaths[layer];
-                        }
-                    });
+                if (data.bodySrc && otherPlayers[id].equipment.body.src !== data.bodySrc) {
+                    otherPlayers[id].equipment.body.src = data.bodySrc;
+                }
+                if (data.faceSrc && otherPlayers[id].equipment.face.src !== data.faceSrc) {
+                    otherPlayers[id].equipment.face.src = data.faceSrc;
                 }
             }
         });
     });
 }
 
-canvas.addEventListener('mousedown', (e) => {
-    const rect = canvas.getBoundingClientRect();
+// 3. INPUT
+mainCanvas.addEventListener('mousedown', (e) => {
+    const rect = mainCanvas.getBoundingClientRect();
     player.targetX = (e.clientX - rect.left) + game.cameraX;
     player.targetY = (e.clientY - rect.top);
 });
 
-const chatInput = document.getElementById('chat-input');
-if(chatInput) {
-    chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && chatInput.value.trim() !== "") {
-            const msg = chatInput.value;
-            player.message = msg;
-            chatInput.value = "";
-            db.collection("active_players").doc(player.id).update({ message: msg });
-            setTimeout(() => {
-                player.message = "";
-                if(player.id) db.collection("active_players").doc(player.id).update({ message: "" });
-            }, 10000);
-        }
-    });
+// 4. MAIN LOOP
+function loop() {
+    if (!game.active) return;
+    
+    player.x += (player.targetX - player.x) * 0.12;
+    player.y += (player.targetY - player.y) * 0.12;
+    game.cameraX = player.x - mainCanvas.width / 2;
+
+    if (player.id && game.frameCount % 30 === 0) {
+        db.collection("active_players").doc(player.id).set({
+            x: Math.round(player.x),
+            y: Math.round(player.y),
+            name: player.name,
+            bodySrc: player.equipment.body.src,
+            faceSrc: player.equipment.face.src
+        }, { merge: true });
+    }
+
+    ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+    
+    if (game.bg.complete) ctx.drawImage(game.bg, -game.cameraX, 0);
+
+    Object.keys(otherPlayers).forEach(id => drawPlayer(otherPlayers[id]));
+    drawPlayer(player);
+
+    game.frameCount++;
+    requestAnimationFrame(loop);
+}
+
+// 5. DRAWING LOGIC (The Sprite Clipping Fix)
+function drawPlayer(p) {
+    const px = p.x - game.cameraX; 
+    const py = p.y; 
+
+    // --- STEP 1: THE CUT (Body) ---
+    const b_sw = 55;   
+    const b_sh = 95;   
+
+    // --- STEP 2: THE SIZE (General) ---
+    const charWidth = 60;  
+    const charHeight = 90; 
+
+    // --- STEP 3: THE DRAW (Body) ---
+    if (p.equipment.body.complete && p.equipment.body.naturalWidth > 0) {
+        ctx.drawImage(
+            p.equipment.body, 
+            0, 0, b_sw, b_sh, 
+            px - (charWidth / 2), py - charHeight, charWidth, charHeight    
+        );
+    }
+
+    // --- STEP 4: FACE CALIBRATION ---
+    const f_sw = 100; 
+    const f_sh = 85;  
+    const f_dw = 95;  
+    const f_dh = 85;  
+
+    if (p.equipment.face.complete && p.equipment.face.naturalWidth > 0) {
+        ctx.drawImage(
+            p.equipment.face, 
+            0, 0, f_sw, f_sh, 
+            // Nudging right by +25 to line up with the neck
+            (px - (f_dw / 2)) + 21, 
+            // py - charHeight anchors it to the body height
+            py - charHeight - 10, 
+            f_dw, 
+            f_dh 
+        );
+    }
+
+
+    // 4. NAME TAG (Board-Ready Spacing)
+         ctx.textAlign = "center";
+        ctx.font = "bold 14px Arial"; // Standard Fantage font style
+
+        // Create the classic dark "halo" effect
+        ctx.shadowColor = "rgba(0, 0, 0, 0.9)"; 
+        ctx.shadowBlur = 3; 
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 1;
+
+        // Fill the text
+        ctx.fillStyle = "white";
+
+        // THE GAP: Using py + 45 ensures the name stays below the feet/board area
+        // so it doesn't look weirdly cut off by the legs.
+        ctx.fillText(p.name || "User", px, py + 45);
+
+        // CRITICAL: Reset shadows so they don't make your player sprites look "glowy"
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
 }
 
 function startGame() {
-    const loader = document.getElementById('loader');
-    if (loader) { loader.style.display = 'none'; }
     game.active = true;
     loop();
 }
 
-function loop() {
-    if (!game.active) return;
-    game.frameCount++;
-
-    player.x += (player.targetX - player.x) * 0.12;
-    player.y += (player.targetY - player.y) * 0.12;
-    game.cameraX = player.x - canvas.width / 2;
-
-    if (player.id && game.frameCount % 10 === 0) {
-        let paths = {};
-        Object.keys(player.equipment).forEach(k => {
-            if(player.equipment[k].src) paths[k] = player.equipment[k].src;
-        });
-
-        db.collection("active_players").doc(player.id).set({
-            x: Math.round(player.x),
-            y: Math.round(player.y),
-            currFrame: player.currFrame,
-            name: player.name,
-            gender: player.gender,
-            message: player.message,
-            isWearingCostume: player.isWearingCostume,
-            equipmentPaths: paths,
-            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (game.bg.complete && game.bg.naturalWidth !== 0) {
-        ctx.drawImage(game.bg, -game.cameraX, 0);
-    }
-
-    Object.keys(otherPlayers).forEach(id => {
-        drawCharacter(otherPlayers[id]);
-    });
-
-    drawCharacter(player);
-
-    requestAnimationFrame(loop);
-}
-
-function drawCharacter(p) {
-    if (!p || !p.equipment) return;
-
-    const px = p.x - game.cameraX - (player.width / 2);
-    const py = p.y - player.height;
-
-    if (p.isWearingCostume && p.equipment.costume && p.equipment.costume.src) {
-        renderLayer(p.equipment.board, px, py, p.currFrame);
-        renderLayer(p.equipment.pet, px, py, p.currFrame);
-        renderLayer(p.equipment.costume, px, py, p.currFrame);
-    } else {
-        const backLayers = ['board', 'pet'];
-        const frontLayers = [
-            'body', 'bottoms', 'tops', 'shoes', 
-            'face', 'faceAcc', 'hair', 'headAcc', 
-            'bodyAcc', 'moodie', 'friendship'
-        ];
-        
-        backLayers.forEach(layer => renderLayer(p.equipment[layer], px, py, p.currFrame));
-        frontLayers.forEach(layer => renderLayer(p.equipment[layer], px, py, p.currFrame));
-    }
-
-    drawLabel(p.name, p.message, p.x, p.y);
-}
-
-function renderLayer(imgObj, x, y, frame) {
-    if (imgObj && imgObj.complete && imgObj.src && imgObj.src !== "" && !imgObj.src.includes('undefined')) {
-        ctx.drawImage(
-            imgObj,
-            frame * player.frameW, 0, 
-            player.frameW, player.frameH,
-            x, y, 
-            player.width, player.height
-        );
-    }
-}
-
-function drawLabel(name, message, x, y) {
-    const screenX = x - game.cameraX;
-    if (message) {
-        ctx.font = "14px Arial";
-        const tw = ctx.measureText(message).width;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.6)"; 
-        ctx.beginPath();
-        ctx.roundRect(screenX - (tw/2) - 10, y - player.height - 45, tw + 20, 30, 10);
-        ctx.fill(); 
-        ctx.fillStyle = "black";
-        ctx.textAlign = "center";
-        ctx.fillText(message, screenX, y - player.height - 25);
-    }
-    ctx.font = "bold 14px Arial";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "white";
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 3;
-    ctx.strokeText(name, screenX, y + 25);
-    ctx.fillText(name, screenX, y + 25);
-}
-
-document.getElementById('set-btn').addEventListener('click', () => {
-    if(confirm("Logout of Dynamic?")) {
-        db.collection("active_players").doc(player.id).delete().then(() => {
-            return auth.signOut();
-        }).then(() => {
-            window.location.href = "index.html"; 
-        }).catch(() => {
-            window.location.href = "index.html";
-        });
-    }
-});
-
 window.addEventListener("beforeunload", () => {
     if (player.id) db.collection("active_players").doc(player.id).delete();
 });
-
-const invBtn = document.getElementById('inv-btn');
-if (invBtn) {
-    invBtn.addEventListener('click', () => {
-        if (typeof toggleInventory === "function") {
-            toggleInventory();
-        }
-    });
-}
+// EMERGENCY OVERRIDE: Force the loader to hide after 2 seconds
+setTimeout(() => {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => { loader.style.display = 'none'; }, 500);
+        console.log("Loader forced closed. Check for missing assets!");
+    }
+}, 2000);
