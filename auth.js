@@ -1,63 +1,118 @@
-// DONOTDELETETHISEVEROMG
-const firebaseConfig = {
-  apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
-  authDomain: "dynamic-40949.firebaseapp.com",
-  projectId: "dynamic-40949",
-  storageBucket: "dynamic-40949.firebasestorage.app",
-  messagingSenderId: "377647789786",
-  appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3",
-  measurementId: "G-9KWEJYE88T"
-};
+// 1. Initialize (Make sure these match your dashboard!)
+const supabaseUrl = 'https://your-project-id.supabase.co';
+const supabaseKey = 'your-anon-key';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+let chosenGender = null;
 
+// 2. Check Auth State (Replaces auth.onAuthStateChanged)
+supabase.auth.onAuthStateChange(async (event, session) => {
+    if (session) {
+        const user = session.user;
+        // Check if user has a profile in our 'users' table
+        const { data, error } = await supabase
+            .from('users')
+            .select('gender')
+            .eq('id', user.id)
+            .single();
+
+        if (data && data.gender) {
+            // Already has a character!
+            window.location.href = "play.html";
+        } else {
+            // New user, show creator
+            showCharacterCreator();
+        }
+    } else {
+        document.getElementById('auth-page').style.display = 'block';
+    }
+});
+
+// 3. Register Function
+async function register() {
+    const name = document.getElementById('userName').value;
+    const invite = document.getElementById('inviteCode').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('pass').value;
+
+    if (invite !== "AuraAraAprilAya3852") return alert("Sorry! Invalid invite code. 🌸");
+    if (!name || !email || !pass) return alert("Fill everything out! ✨");
+
+    const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: pass
+    });
+
+    if (error) return alert(error.message);
+    
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    showCharacterCreator();
+}
+
+// 4. Login Function
+async function login() {
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('pass').value;
+
+    const { error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: pass
+    });
+
+    if (error) alert(error.message);
+}
+
+// 5. Save Character (Replaces db.collection.set)
 async function confirmCharacter() {
     if (!chosenGender) return;
-    
-    const user = auth.currentUser;
-    // Get the name from the input field
-    const nameInput = document.getElementById('userName').value || "User";
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const usernameInput = document.getElementById('userName').value || "New Traveler";
 
     const starterData = {
-        username: nameInput,
+        id: user.id, // Very important for Supabase!
+        username: usernameInput,
         gender: chosenGender,
         stars: 1000,
         level: 1,
         currentOutfit: {
-            // These IDs now match the keys in assets.js!
             body: chosenGender === 'F' ? 'body_f' : 'body_m',
             hair: 'none',
             tops: 'none'
         }
     };
 
-    try {
-        await db.collection("users").doc(user.uid).set(starterData);
+    const { error } = await supabase
+        .from('users')
+        .upsert(starterData); // Upsert handles both "create" and "update"
+
+    if (error) {
+        alert("Error saving: " + error.message);
+    } else {
         window.location.href = "play.html";
-    } catch (e) {
-        alert("Error saving: " + e.message);
     }
 }
 
+// 6. Logout
+async function logout() {
+    await supabase.auth.signOut();
+    window.location.href = "index.html";
+}
 
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        // Check if this user already picked a gender
-        db.collection("users").doc(user.uid).get().then(doc => {
-            if (doc.exists && doc.data().gender) {
-                // If they have a character, send them to the game!
-                window.location.href = "play.html"; 
-            } else {
-                // If they are new, show the Character Picker
-                showCharacterCreator();
-            }
-        });
-    } else {
-        document.getElementById('auth-page').style.display = 'block';
-    }
-});
+// --- UI Functions (These stay exactly the same!) ---
+
+function selectGender(gender) {
+    chosenGender = gender;
+    document.getElementById('option-f').classList.remove('selected');
+    document.getElementById('option-m').classList.remove('selected');
+    document.getElementById(`option-${gender.toLowerCase()}`).classList.add('selected');
+    document.getElementById('enter-btn').style.display = 'inline-block';
+}
+
+function showCharacterCreator() {
+    document.getElementById('auth-fields').style.display = 'none'; 
+    document.getElementById('char-setup').style.display = 'block'; 
+}
 
 function toggleAuth(mode) {
     const nameField = document.getElementById('name-field');
@@ -76,77 +131,4 @@ function toggleAuth(mode) {
         loginActions.style.display = 'block';
         title.innerText = "🌸 Login";
     }
-}
-
-function showCharacterCreator() {
-    
-    document.getElementById('auth-fields').style.display = 'none'; 
-    document.getElementById('char-setup').style.display = 'block'; 
-}
-
-function register() {
-    const name = document.getElementById('userName').value;
-    const invite = document.getElementById('inviteCode').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('pass').value;
-
-    if(invite !== "AuraAraAprilAya3852") return alert("Sorry! Invalid invite code. 🌸");
-    if(!name || !email || !pass) return alert("Fill everything out! ✨");
-
-    auth.createUserWithEmailAndPassword(email, pass)
-        .then(() => {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            // Instead of enterApp(), we show the Character Creator
-            showCharacterCreator(); 
-        })
-        .catch(err => alert(err.message));
-}
-
-function login() {
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('pass').value;
-    
-    auth.signInWithEmailAndPassword(email, pass)
-        .catch(err => alert(err.message));
-}
-
-function logout() {
-    auth.signOut().then(() => {
-        window.location.href = "index.html";
-    });
-}
-
-
-let chosenGender = null;
-
-function selectGender(gender) {
-    chosenGender = gender;
-    
-    
-    document.getElementById('option-f').classList.remove('selected');
-    document.getElementById('option-m').classList.remove('selected');
-    document.getElementById(`option-${gender.toLowerCase()}`).classList.add('selected');
-    
-    
-    document.getElementById('enter-btn').style.display = 'inline-block';
-}
-
-async function confirmCharacter() {
-    if (!chosenGender) return;
-    
-    const user = auth.currentUser;
-    const username = document.getElementById('userName').value || "New Traveler";
-
-    await db.collection("users").doc(user.uid).set({
-        username: username,
-        gender: chosenGender,
-        stars: 1000, 
-        level: 1,
-        currentOutfit: {
-            body: chosenGender === 'F' ? 'body_f' : 'body_m',
-            hair: 'none',
-            tops: 'none'
-        }
-    });
-    window.location.href = "play.html";
 }
