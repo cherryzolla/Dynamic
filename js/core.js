@@ -335,10 +335,39 @@ function drawPlayer(p) {
     }
 
     // 6. USERNAME (Don't move it!)
+   const username = p.name || "User";
+    const title = "Golden Girl"; 
+    ctx.font = "bold 12px 'Tahoma', sans-serif";
+
+    // 1. Measure for the oval width
+    const nameWidth = ctx.measureText(username).width;
+    const titleWidth = ctx.measureText(title).width;
+    const maxWidth = Math.max(nameWidth, titleWidth);
+
+    // 2. The 14px Height Oval (The "Floor")
+    const nameplateY = py - 10; 
+    const ovalWidth = maxWidth + 25; 
+    const ovalHeight = 14; // Your preferred height
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+    ctx.beginPath();
+    ctx.ellipse(px - 10, nameplateY, ovalWidth / 2, ovalHeight / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. Draw the Stacked Text
     ctx.textAlign = "center";
-    ctx.font = "bold 14px Arial"; 
-    ctx.fillStyle = "white";
-    ctx.fillText(p.name || "User", px - 10, py - 15);
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 3;
+
+    // TITLE (Red) - Sits slightly ABOVE the oval center
+    ctx.strokeText(title, px - 10, nameplateY - 2); 
+    ctx.fillStyle = "#FF0000"; 
+    ctx.fillText(title, px - 10, nameplateY - 2);
+
+    // USERNAME (Black) - Sits slightly BELOW the oval center
+    ctx.strokeText(username, px - 10, nameplateY + 10); 
+    ctx.fillStyle = "black";
+    ctx.fillText(username, px - 10, nameplateY + 10);
 }
 function startGame() {
     game.active = true;

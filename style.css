@@ -74,9 +74,21 @@ body {
     box-shadow: 6px 6px 0px 0px var(--pink); 
 }
 #chat-input {
-    position: relative;
-    z-index: 1000;
-    pointer-events: auto !important;
+    width: 300px;
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 2px solid #ff8fb1; /* Pink border */
+    background: #fff;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    color: #444;
+    outline: none;
+    transition: 0.2s;
+}
+
+#chat-input:focus {
+    border-color: #ff5e8e;
+    box-shadow: 0 0 8px rgba(255, 143, 177, 0.5);
 }
 
 .ui-bar {
@@ -206,144 +218,97 @@ canvas {
     background: #ff8fb1;
     border-color: #000;
 }
-/* THE MAIN CASE: Combined #id-fone-overlay and .idfone-container */
-#id-fone-overlay {
-    display: none; /* Hidden until Firebase click */
+/* --- MAIN FONE CONTAINER --- */
+#idfone-overlay {
+    display: none; 
+    flex-direction: column; /* Stacks Top Bar, Content, and Bottom Bar */
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    
-    /* Dimensions & Background */
     width: 580px;
     height: 420px;
-    background: #FDF2D5; /* Beige/Cream from image */
-    
-    /* The Signature Thick Pink/Coral Border */
-    border: 12px solid #FF7F7F; 
+    background: #FDF2D5; /* Beige/Cream */
+    border: 12px solid #FF7F7F; /* Signature Pink Border */
     border-radius: 30px;
-    
     padding: 15px;
     z-index: 10000;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+    box-sizing: border-box;
+    overflow: hidden; 
 }
 
 /* TOP STATS BAR (S, e, G) */
 .idfone-stats-row {
     display: flex;
     justify-content: space-around;
-    background: #FFF9C4; /* Yellowish gold */
+    background: #FFF9C4; /* Golden Yellow */
     border-radius: 20px;
     padding: 8px;
     margin-bottom: 15px;
     border: 2px solid #EED79B;
+    width: 100%; /* Spans the full top */
 }
 
-.idfone-stat-item {
-    color: #4b0082; /* Deep Purple text for numbers */
-    font-weight: bold;
-    font-size: 16px;
-}
-
-/* MAIN LAYOUT SECTION */
-.idfone-main {
+/* MAIN CONTENT AREA */
+.idfone-content {
     display: flex;
     justify-content: space-between;
+    height: 230px; 
 }
 
-.idfone-left, .idfone-right {
+.idfone-column {
     width: 48%;
+    display: flex;
+    flex-direction: column;
 }
 
-/* LEFT SIDE: Name, Rank, and Character */
+/* LEFT SIDE: Name, Rank, and Avatar */
 .idfone-name-text {
     font-size: 22px;
-    color: #3C221D; /* Dark Brown */
+    color: #3C221D;
     font-weight: bold;
-    margin: 0;
 }
 
 .idfone-rank-text {
-    color: #D2042D; /* Cherry Red */
+    color: #D2042D;
     font-weight: bold;
     font-style: italic;
-    margin: 2px 0;
 }
 
-.idfone-avatar-box {
+.idfone-avatar-preview {
     width: 100%;
-    height: 160px;
-    background: #B3E5FC; /* Sky Blue character background */
+    height: 140px;
+    background: #B3E5FC; /* Sky Blue */
     border-radius: 20px;
+    border: 3px solid #FFF;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 10px;
-    border: 3px solid #FFF;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
 }
 
 /* RIGHT SIDE: Profile Rows */
 .idfone-profile-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     border-bottom: 2px solid #EED79B;
-    padding: 10px 0;
-    color: #4b0082; /* Purple text */
-    font-weight: bold;
+    padding: 6px 0;
 }
 
-.idfone-label {
-    color: #D2042D; /* Cherry Red for labels like "Mood:" */
-}
-
-/* BUTTONS */
-.idfone-blue-btn {
-    background: #0091EA;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 6px 12px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 3px 0 #007BB5;
-    margin-top: 10px;
-    width: 100%;
-}
-
-.idfone-blue-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 #007BB5;
-}
-
-/* BOTTOM APP NAVIGATION BAR */
-.idfone-nav-bar {
+/* BOTTOM APP BAR */
+.idfone-app-bar {
     position: absolute;
-    bottom: 12px;
-    left: 12px;
-    right: 12px;
-    height: 75px;
-    background: #37474F; /* Dark Slate Gray bar */
-    border-radius: 20px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background: #37474F; /* Dark Slate Gray */
     display: flex;
     justify-content: space-around;
     align-items: center;
     color: white;
-    font-size: 11px;
-}
-
-.idfone-app { 
-    text-align: center; 
-    cursor: pointer; 
-    line-height: 1.2;
-}
-
-.idfone-app b {
-    font-size: 18px;
-    display: block;
-    margin-bottom: 2px;
+    border-radius: 0 0 18px 18px;
 }
 /* Ensure inventory buttons don't stretch */
 #inv-tabs img {

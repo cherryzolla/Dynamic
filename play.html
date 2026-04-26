@@ -39,6 +39,17 @@
     </div>
 
     <script>
+            document.getElementById('set-btn').onclick = () => {
+    // Show your logout option
+    if(confirm("Logout of Prism?")) {
+        firebase.auth().signOut().then(() => {
+            // Once signed out, redirect to your login page
+            window.location.href = "index.html";
+        }).catch((error) => {
+            console.error("Logout failed:", error);
+        });
+    }
+    };
         // Helper function to load external HTML
         async function loadComponent(file, wrapperId) {
             try {
@@ -79,6 +90,9 @@
         });
     </script>
     <script src="js/core.js"></script>
+    <script src="js/idfone.js">
+        
+    </script>
     <script src="js/inventory.js"></script>
     
 </body>

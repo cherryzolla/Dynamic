@@ -1,0 +1,43 @@
+{
+  "tops": [
+    {
+      "id": "strawberry_top",
+      "name": "Strawberry Top",
+      "gender": "girl",
+      "src": "assets/items/girl/tops/girl-top-strawberryShirt.png",
+      "icon": "assets/items/girl/tops/girl-top-strawberryShirt.png",
+      "subType": "top",
+      "layer": 3
+    },
+    {
+      "id": "kitty1929_maroon_top",
+      "name": "Kitty1929's Maroon Top",
+      "gender": "girl",
+      "src": "assets/items/tops/2015_04_girl_shirt_user_inspired_2.png",
+      "subType": "top",
+      "layer": 3
+    }
+  ],
+  "hair": [
+    {
+      "id": "blonde_beta_crown",
+      "name": "Blonde Beta Crown Hair",
+      "gender": "girl",
+      "src": "assets/items/girl/hair/girl-hair-betacrownbld.png",
+      "icon": "assets/items/girl/hair/girl-hair-betacrownbld.png",
+      "subType": "hair",
+      "layer": 4
+    }
+  ],
+  "boards": [
+    {
+      "id": "puppy_board",
+      "name": "Puppy Board",
+      "gender": "unisex",
+      "src": "assets/items/boards/animated/board-puppy-09-2009_rev0111(1).png",
+      "icon": "assets/items/boards/still/board-puppy-09-2009_rev0111.png",
+      "subType": "board",
+      "layer": 1
+    }
+  ]
+}
