@@ -1,8 +1,18 @@
-// 1. Initialize (Make sure these match your dashboard!)
-const supabaseUrl = 'https://your-project-id.supabase.co';
-const supabaseKey = 'your-anon-key';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+import { createClient } from '@supabase/supabase-js'
 
+// You get these from your Supabase Dashboard -> Settings -> API
+const supabaseUrl = 'https://wgxszhetpietfjlgeffp.supabase.co'
+const supabaseKey = 'sb_publishable_3NhlyfBqrV1fI3g_-TbMBA_NkXH8JRs'
+
+export const supabase = createClient(supabaseUrl, supabaseKey)
+// This makes sure your buttons in index.html can "see" these functions
+window.login = login;
+window.register = register;
+window.toggleAuth = toggleAuth;
+window.confirmCharacter = confirmCharacter;
+window.selectGender = selectGender;
+
+// ... the rest of the functions I gave you before ...
 let chosenGender = null;
 
 // 2. Check Auth State (Replaces auth.onAuthStateChanged)
