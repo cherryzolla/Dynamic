@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 </head>
-<<body style="background: #1a1a1a; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh;">
+<body style="background: #1a1a1a; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh;">
 
     <div id="game-wrapper" style="position: relative; border: 4px solid #ff8fb1; border-radius: 12px; overflow: hidden; width: 800px; height: 494px; background: #87CEEB;">
         
@@ -19,93 +19,14 @@
         </div>
 
         <canvas id="prismCanvas" width="800" height="494"></canvas>
-        <div id="inventory-window" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 500px; z-index: 1000; font-family: 'Arial', sans-serif;">
-    
-    <img src="assets/ui/fntg-ui-inventory-bg-1.png" style="position: absolute; width: 100%; height: 100%; border-radius: 15px;">
-    
-    <div style="position: absolute; top: 80px; left: 20px; right: 20px; bottom: 20px; background-color: #B5E2FF; border-radius: 10px; border: 2px solid #79B8E0;">
-        
-        <div id="inv-tabs" style="position: absolute; top: -42px; left: 10px; display: flex; gap: 2px;">
-            <img src="assets/ui/fntg-ui-inventory-buttons-hair.png" onclick="filterInv('hair')" style="cursor:pointer; height: 40px;">
-            <img src="assets/ui/fntg-ui-inventory-buttons-clothes.png" onclick="filterInv('tops')" style="cursor:pointer; height: 40px;">
-            <img src="assets/ui/fntg-ui-inventory-buttons-board.png" onclick="filterInv('board')" style="cursor:pointer; height: 40px;">
-            <img src="assets/ui/fntg-ui-inventory-buttons-accessory.png" onclick="filterInv('faceAcc')" style="cursor:pointer; height: 40px;">
-            <img src="assets/ui/fntg-ui-inventory-buttons-favorite.png" style="cursor:pointer; height: 40px;">
-            <img src="assets/ui/fntg-ui-inventory-buttons-creature.png" style="cursor:pointer; height: 40px;">
-        </div>
 
-        <div style="position: absolute; top: 20px; left: 20px; width: 500px; height: 360px; background: white; border: 2px solid #79B8E0; border-radius: 10px;">
-            <div id="item-grid" style="padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; overflow-y: auto; height: 100%;">
-                </div>
-        </div>
+        <div id="inventory-wrapper"></div>
+        <div id="id-fone-wrapper"></div>
 
-        <div style="position: absolute; top: 20px; right: 20px; width: 220px; height: 360px;">
-            <img src="assets/ui/fntg-ui-inventory-character-preview-bg.png" style="width: 100%; height: 100%;">
-            <canvas id="previewCanvas" width="200" height="300" style="position: absolute; top: 30px; left: 10px;"></canvas>
-            
-            <button style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(#D38DFF, #9B4DFF); color: white; border: 2px solid white; border-radius: 15px; padding: 5px 15px; cursor: pointer; font-weight: bold;">Dye Your Hair!</button>
-        </div>
-    </div>
-
-    <img src="assets/ui/fntg-ui-x-button.png" onclick="toggleInventory()" style="position: absolute; top: 15px; right: 15px; width: 35px; cursor: pointer;">
-</div>
-
-<div id="id-fone-overlay" style="display:none;">
-    <div id="idfone-overlay" class="idfone-container" style="display:none;">
-    <div class="idfone-stats-row">
-        <div class="idfone-stat-item"><b>S:</b> <span id="idfone-stars">0</span></div>
-        <div class="idfone-stat-item"><b>e:</b> <span id="idfone-ecoins">0</span></div>
-        <div class="idfone-stat-item"><b>G:</b> <span id="idfone-gold">0</span></div>
-    </div>
-
-    <div class="idfone-content">
-        <div class="idfone-column">
-            <div id="idfone-username" class="idfone-name-text">Username</div>
-            <div class="idfone-rank-text">MAJOR LEAGUER</div>
-            <div class="idfone-level-text">Level: <span id="idfone-level">0</span></div>
-            <button class="idfone-blue-btn">Plate Inventory</button>
-            
-            <div class="idfone-avatar-preview">
-                <div class="idfone-avatar-placeholder">P</div>
-            </div>
-        </div>
-
-        <div class="idfone-column">
-            <div class="idfone-profile-row">
-                <span class="idfone-label">Mood:</span>
-                <span id="idfone-mood" class="idfone-value">Jealous</span>
-                <span class="idfone-icon-letter">(M)</span>
-            </div>
-            <div class="idfone-profile-row">
-                <span class="idfone-label">Color:</span>
-                <span id="idfone-color" class="idfone-value">Black</span>
-                <span class="idfone-icon-letter">(C)</span>
-            </div>
-            <div class="idfone-profile-row">
-                <span class="idfone-label">Game:</span>
-                <span id="idfone-game" class="idfone-value">Fashion Show</span>
-            </div>
-            <button class="idfone-blue-btn">Edit Profile</button>
-            <div class="idfone-friends-count">6 Friends Invited</div>
-        </div>
-    </div>
-
-    <div class="idfone-app-bar">
-        <div class="idfone-app-unit"><b>A</b><br>Apps</div>
-        <div class="idfone-app-unit"><b>C</b><br>Custom</div>
-        <div class="idfone-app-unit"><b>M</b><br>Medals</div>
-        <div class="idfone-app-unit"><b>S</b><br>Stickers</div>
-        <div class="idfone-app-unit"><b>e</b><br>eCoins</div>
-        <div class="idfone-app-unit"><b>I</b><br>Invite</div>
-        <div class="idfone-app-unit"><b>F</b><br>Farm</div>
-    </div>
-</div>
-
-        <div class="ui-bar" style="position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 15px; pointer-events: none;">
-            
+        <div class="ui-bar" style="position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 15px; pointer-events: none; z-index: 50;">
             
             <img src="assets/ui/fntg-ui-button-world-map.png" id="map-btn" style="width: 45px; cursor: pointer; pointer-events: auto;">
-            <img src="assets/ui/fntg-ui-button-inventory.png" id="inv-btn" style="width: 45px; cursor: pointer; pointer-events: auto;">
+            <img src="assets/ui/fntg-ui-button-inventory.png" id="inv-btn" style="width: 45px; cursor: pointer; pointer-events: auto;" onclick="toggleInventory()">
 
             <div id="chat-wrapper" style="pointer-events: auto;">
                 <input type="text" id="chat-input" placeholder="Type to chat..." maxlength="50" 
@@ -116,8 +37,49 @@
             
         </div>
     </div>
-    
-<script src="core.js"></script>
-<script src="idfone.js"></script>
 
+    <script>
+        // Helper function to load external HTML
+        async function loadComponent(file, wrapperId) {
+            try {
+                const response = await fetch(file);
+                if (!response.ok) throw new Error(`Could not find ${file}`);
+                const html = await response.text();
+                
+                const wrapper = document.getElementById(wrapperId);
+                wrapper.innerHTML = html;
+                
+                // Hide the content inside the wrapper after loading
+                if (wrapper.firstElementChild) {
+                    wrapper.firstElementChild.style.display = 'none';
+                }
+                console.log(`Loaded: ${file}`);
+            } catch (err) {
+                console.warn("UI Load Error:", err);
+            }
+        }
+
+        // Wait for the HTML structure to be ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load the HTML parts first
+            await loadComponent('idfone.html', 'id-fone-wrapper');
+            await loadComponent('inventory.html', 'inventory-wrapper');
+
+            console.log("HTML Components ready. Starting game scripts...");
+
+            // Load core.js AFTER the canvas and HTML are ready
+            const coreScript = document.createElement('script');
+            coreScript.src = "core.js";
+            document.body.appendChild(coreScript);
+
+            // Load idfone.js
+            const foneScript = document.createElement('script');
+            foneScript.src = "idfone.js";
+            document.body.appendChild(foneScript);
+        });
+    </script>
+    <script src="js/core.js"></script>
+    <script src="js/inventory.js"></script>
+    
 </body>
+</html>

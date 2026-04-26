@@ -73,6 +73,15 @@ body {
     margin-bottom: 20px; 
     box-shadow: 6px 6px 0px 0px var(--pink); 
 }
+#chat-input {
+    position: relative;
+    z-index: 1000;
+    pointer-events: auto !important;
+}
+
+.ui-bar {
+    z-index: 999;
+}
 
 /* 4. INTERACTIVE ELEMENTS */
 input, textarea { 
@@ -335,4 +344,28 @@ canvas {
     font-size: 18px;
     display: block;
     margin-bottom: 2px;
+}
+/* Ensure inventory buttons don't stretch */
+#inv-tabs img {
+    width: auto !important; /* Keep the original width of the PNG */
+    height: 40px !important; /* Force the height you want */
+    object-fit: contain;
+    display: block;
+}
+
+/* Fix for the X button stretching */
+#inventory-window > img[onclick*="toggleInventory"] {
+    width: 35px !important;
+    height: auto !important;
+}
+
+/* Ensure the background image covers the whole window correctly */
+#inventory-window > img:first-child {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: fill;
+    z-index: -1;
+}
+#inventory-window * {
+    box-sizing: border-box;
 }

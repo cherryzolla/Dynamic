@@ -1,12 +1,32 @@
 // idfone.js
 async function openIdFone(userId) {
-    // It will find the 'db' we attached to the window in core.js
+    // 1. Find the overlay
+    const overlay = document.getElementById('idfone-overlay');
+    overlay.style.display = 'block';
+    if (!overlay) {
+        console.error("ID Fone HTML not loaded yet!");
+        return;
+    }
+
+    // 2. Fetch from Firebase
     const userRef = window.db.collection("users").doc(userId);
     const snap = await userRef.get();
 
     if (snap.exists) {
         const data = snap.data();
-        // ... fill your idfone UI ...
+
+        // 3. Update the UI with Firebase data
+        document.getElementById('idfone-username').innerText = data.username || "Unknown";
+        document.getElementById('idfone-stars').innerText = data.stars || 0;
+        document.getElementById('idfone-ecoins').innerText = data.ecoins || 0;
+        document.getElementById('idfone-gold').innerText = data.gold || 0;
+        document.getElementById('idfone-level').innerText = data.level || 0;
+        document.getElementById('idfone-mood').innerText = data.mood || "Happy";
+
+        // 4. Finally, SHOW the phone
+        overlay.style.display = 'block'; 
+        // Or if you use the id-fone-overlay wrapper:
+        document.getElementById('id-fone-overlay').style.display = 'block';
     }
 }
 async function showIdFone(userId) {
@@ -16,8 +36,6 @@ async function showIdFone(userId) {
     if (snap.exists()) {
         const data = snap.data();
         const overlay = document.getElementById("id-fone-overlay");
-        
-        // Fill the HTML template with Firebase data
         overlay.innerHTML = `
             <div class="idfone-shell">
                 <div class="idfone-screen">

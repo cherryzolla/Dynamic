@@ -1,0 +1,40 @@
+<div id="inventory-window" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 500px; z-index: 1000; font-family: 'Arial', sans-serif; display: none;">
+    
+    <img src="assets/ui/fntg-ui-inventory-bg-1.png" style="position: absolute; width: 100%; height: 100%; border-radius: 15px;">
+    
+    <div id="inv-tabs" style="position: absolute; top: 38px; left: 30px; display: flex; gap: 2px; z-index: 1010;">
+        <img src="assets/ui/fntg-ui-inventory-buttons-hair.png" onclick="filterInv('hair')" style="cursor:pointer; height: 40px;">
+        <img src="assets/ui/fntg-ui-inventory-buttons-clothes.png" onclick="filterInv('tops')" style="cursor:pointer; height: 40px;">
+        <img src="assets/ui/fntg-ui-inventory-buttons-board.png" onclick="filterInv('board')" style="cursor:pointer; height: 40px;">
+        <img src="assets/ui/fntg-ui-inventory-buttons-accessory.png" onclick="filterInv('faceAcc')" style="cursor:pointer; height: 40px;">
+        <img src="assets/ui/fntg-ui-inventory-buttons-favorite.png" style="cursor:pointer; height: 40px;">
+        <img src="assets/ui/fntg-ui-inventory-buttons-creature.png" style="cursor:pointer; height: 40px;">
+    </div>
+
+    <div style="position: absolute; top: 80px; left: 20px; right: 20px; bottom: 20px; background-color: #B5E2FF; border-radius: 10px; border: 2px solid #79B8E0; overflow: visible;">
+        
+        <div id="sub-nav-bar" style="position: absolute; top: 5px; left: 20px; width: 500px; height: 30px; display: flex; align-items: center; gap: 15px; font-family: 'Arial Black', sans-serif; font-size: 11px; color: white; text-transform: uppercase; z-index: 10;">
+            </div>
+
+        <div style="position: absolute; top: 35px; left: 15px; width: 500px; height: 345px; background: white; border: 2px solid #79B8E0; border-radius: 10px; z-index: 5;">
+            <div id="item-grid" style="padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; overflow-y: auto; height: 100%; box-sizing: border-box;">
+                </div>
+        </div>
+
+        <div style="position: absolute; top: 35px; right: 15px; width: 220px; height: 345px;">
+            <img src="assets/ui/fntg-ui-inventory-character-preview-bg.png" style="width: 100%; height: 100%;">
+            <canvas id="previewCanvas" width="200" height="300" style="position: absolute; top: 20px; left: 10px;"></canvas>
+            
+            <button style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: linear-gradient(#D38DFF, #9B4DFF); color: white; border: 2px solid white; border-radius: 15px; padding: 6px 18px; cursor: pointer; font-weight: bold; font-size: 13px;">
+                Dye Your Hair!
+            </button>
+        </div>
+    </div>
+    
+
+    <img src="assets/ui/fntg-ui-x-button.png" onclick="toggleInventory()" style="position: absolute; top: 15px; right: 15px; width: 35px; cursor: pointer; z-index: 2000;">
+</div>
+<div id="player-preview-container" style="width: 200px; height: 300px; position: relative;">
+    <canvas id="previewCanvas" width="200" height="300"></canvas>
+    <button id="dye-btn">Dye Your Hair!</button>
+</div>
