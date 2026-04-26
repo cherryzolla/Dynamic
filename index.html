@@ -40,7 +40,7 @@
 
             <div id="char-setup" style="display:none; text-align: center; animation: fadeIn 0.5s;">
                 <h1 style="color: #ff8fb1; font-family: 'Quicksand';">Choose Your Look 🌸</h1>
-                <p style="color: #888; margin-bottom: 30px; font-size: 13px;">This will be your base avatar in Downtown!</p>
+                <p style="color: #888; margin-bottom: 30px; font-size: 13px;">This will be your base avatar!</p>
 
                 <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 40px;">
                     <div class="char-option" onclick="selectGender('F')" id="option-f">
@@ -59,15 +59,26 @@
                 </div>
                 <button onclick="confirmCharacter()" id="enter-btn" class="bubbly-btn" style="width: 250px; display: none;">
                     Confirm & Enter Prism ✨
-                <script src="./play.html"></script></button>
+                </button>
             </div>
 
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+  // Wait until the page is fully loaded to be safe
+  window.onload = () => {
+    const supabaseUrl = 'https://your-api-url.supabase.co'
+    const supabaseKey = 'your-anon-key'
+    
+    // Use window.supabase to make sure it finds the library
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+    
+    console.log("Did it work?", supabase)
+  };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script src="./auth.js"></script>
