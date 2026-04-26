@@ -11,7 +11,6 @@
 
     <div id="auth-page" class="auth-page">
         <div class="auth-box">
-            
             <div id="auth-fields">
                 <h1 id="auth-title" style="color: #ff8fb1">🌸 Login</h1>
                 
@@ -47,41 +46,27 @@
                         <div class="char-preview-bg">
                             <img src="assets/items/girl/body/fantage-girl-outline.png" alt="Girl Base">
                         </div>
-                        <h3 style="margin-center: 15px;">GIRL</h3>
+                        <h3>GIRL</h3>
                     </div>
 
                     <div class="char-option" onclick="selectGender('M')" id="option-m">
                         <div class="char-preview-bg">
                             <img src="assets/items/boy/body/fantage-boy-outline.png" alt="Boy Base">
                         </div>
-                        <h3 style="margin-center: 15px;">BOY</h3>
+                        <h3>BOY</h3>
                     </div>
                 </div>
                 <button onclick="confirmCharacter()" id="enter-btn" class="bubbly-btn" style="width: 250px; display: none;">
                     Confirm & Enter Prism ✨
                 </button>
             </div>
-
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script>
-  // Wait until the page is fully loaded to be safe
-  window.onload = () => {
-    const supabaseUrl = 'https://your-api-url.supabase.co'
-    const supabaseKey = 'your-anon-key'
-    
-    // Use window.supabase to make sure it finds the library
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
-    
-    console.log("Did it work?", supabase)
-  };
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <script src="./auth.js"></script>
     <script src="./assets.js"></script>
+    <script src="./auth.js"></script>
 </body>
 </html>
