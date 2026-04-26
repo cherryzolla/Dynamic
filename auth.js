@@ -2,7 +2,7 @@
 
 // 1. Setup (REPLACE WITH YOUR ACTUAL DATA)
 const supabaseUrl = 'https://wgxszhetpietfjlgeffp.supabase.co';
-const supabaseKey = 'sb_publishable_3NhlyfBqrV1fI3g_-TbMBA_NkXH8JRs';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneHN6aGV0cGlldGZqbGdlZmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxODUxOTYsImV4cCI6MjA5Mjc2MTE5Nn0.WPfXK-5qPgvnZP2H_eyC55EXpfAf8C7rGLsDwv86Oz0';
 
 // 2. Create the connection
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
