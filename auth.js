@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+
 
 // You get these from your Supabase Dashboard -> Settings -> API
 const supabaseUrl = 'https://wgxszhetpietfjlgeffp.supabase.co'
