@@ -269,7 +269,7 @@ function loop() {
     game.cameraX = player.x - mainCanvas.width / 2;
 
     // Sync to Firebase every 30 frames
-if (player.id && game.frameCount % 30 === 0) {
+if (player.id && game.frameCount % 200 === 0) {
     db.collection("active_players").doc(player.id).set({
         x: Math.round(player.x),
         y: Math.round(player.y),
