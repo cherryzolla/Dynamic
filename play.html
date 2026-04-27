@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Prism</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-</head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    </head>
 <body style="background: #1a1a1a; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh;">
 
     <div id="game-wrapper" style="position: relative; border: 4px solid #ff8fb1; border-radius: 12px; overflow: hidden; width: 800px; height: 494px; background: #87CEEB;">
@@ -24,7 +22,6 @@
         <div id="id-fone-wrapper"></div>
 
         <div class="ui-bar" style="position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 15px; pointer-events: none; z-index: 50;">
-            
             <img src="assets/ui/fntg-ui-button-world-map.png" id="map-btn" style="width: 45px; cursor: pointer; pointer-events: auto;">
             <img src="assets/ui/fntg-ui-button-inventory.png" id="inv-btn" style="width: 45px; cursor: pointer; pointer-events: auto;" onclick="toggleInventory()">
 
@@ -34,66 +31,70 @@
             </div>
 
             <img src="assets/ui/fntg-ui-button-settings.png" id="set-btn" style="width: 45px; cursor: pointer; pointer-events: auto;">
-            
         </div>
     </div>
 
     <script>
-            document.getElementById('set-btn').onclick = () => {
-    // Show your logout option
-    if(confirm("Logout of Prism?")) {
-        firebase.auth().signOut().then(() => {
-            // Once signed out, redirect to your login page
-            window.location.href = "index.html";
-        }).catch((error) => {
-            console.error("Logout failed:", error);
-        });
-    }
-    };
-        // Helper function to load external HTML
-        async function loadComponent(file, wrapperId) {
-            try {
-                const response = await fetch(file);
-                if (!response.ok) throw new Error(`Could not find ${file}`);
-                const html = await response.text();
-                
-                const wrapper = document.getElementById(wrapperId);
-                wrapper.innerHTML = html;
-                
-                // Hide the content inside the wrapper after loading
-                if (wrapper.firstElementChild) {
-                    wrapper.firstElementChild.style.display = 'none';
-                }
-                console.log(`Loaded: ${file}`);
-            } catch (err) {
-                console.warn("UI Load Error:", err);
-            }
+    // --- 1. THE ONLY PROTECTION SCRIPT YOU NEED ---
+    async function checkAccess() {
+        console.log("Checking security clearance...");
+        
+        // Wait for Supabase to find the session
+        const { data: { session }, error } = await window.supabase.auth.getSession();
+
+        if (error || !session) {
+            console.warn("Access Denied. Back to login!");
+            window.location.replace("index.html");
+            return;
         }
 
-        // Wait for the HTML structure to be ready
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Load the HTML parts first
-            await loadComponent('idfone.html', 'id-fone-wrapper');
-            await loadComponent('inventory.html', 'inventory-wrapper');
-
-            console.log("HTML Components ready. Starting game scripts...");
-
-            // Load core.js AFTER the canvas and HTML are ready
-            const coreScript = document.createElement('script');
-            coreScript.src = "core.js";
-            document.body.appendChild(coreScript);
-
-            // Load idfone.js
-            const foneScript = document.createElement('script');
-            foneScript.src = "idfone.js";
-            document.body.appendChild(foneScript);
-        });
-    </script>
-    <script src="js/core.js"></script>
-    <script src="js/idfone.js">
+        console.log("Access Granted! User:", session.user.id);
         
+        // Hide loader once everything is ready
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            if(loader) loader.style.opacity = '0';
+            setTimeout(() => { if(loader) loader.style.display = 'none'; }, 500);
+        }, 1000);
+    }
+
+    // --- 2. LOGOUT LOGIC (FIXED FOR SUPABASE) ---
+    document.getElementById('set-btn').onclick = async () => {
+        if(confirm("Logout of Prism?")) {
+            const { error } = await window.supabase.auth.signOut();
+            if(!error) window.location.href = "index.html";
+        }
+    };
+
+    // --- 3. COMPONENT LOADER ---
+    async function loadComponent(file, wrapperId) {
+        try {
+            const response = await fetch(file);
+            if (!response.ok) throw new Error(`Could not find ${file}`);
+            const html = await response.text();
+            const wrapper = document.getElementById(wrapperId);
+            wrapper.innerHTML = html;
+            if (wrapper.firstElementChild) wrapper.firstElementChild.style.display = 'none';
+        } catch (err) {
+            console.warn("UI Load Error:", err);
+        }
+    }
+
+    // --- 4. STARTUP SEQUENCE ---
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Run security check first
+        await checkAccess();
+
+        // Then load components
+        await loadComponent('idfone.html', 'id-fone-wrapper');
+        await loadComponent('inventory.html', 'inventory-wrapper');
+
+        console.log("Ready to play!");
+    });
     </script>
+
+    <script src="js/core.js"></script>
+    <script src="js/idfone.js"></script>
     <script src="js/inventory.js"></script>
-    
 </body>
 </html>

@@ -1,14 +1,5 @@
-const firebaseConfig = {
-    apiKey: "AIzaSyAXvloQVCgdaqHJSUMW9EjoMR6loLsDKpQ",
-    authDomain: "dynamic-40949.firebaseapp.com",
-    projectId: "dynamic-40949",
-    storageBucket: "dynamic-40949.firebasestorage.app",
-    messagingSenderId: "377647789786",
-    appId: "1:377647789786:web:0c9b5fbdd0880f36b297e3"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+// --- SUPABASE INITIALIZATION ---
+const supabase = window.supabase; // Use the one loaded in play.html
 // Attach it to the window so idfone.js can "see" it
 window.db = db;
 // --- 1. CANVAS SETUP ---
@@ -63,66 +54,49 @@ auth.onAuthStateChanged(user => {
 });
 
 function startMultiplayer() {
-    db.collection("active_players")
-      .where(firebase.firestore.FieldPath.documentId(), "!=", player.id)
-      .onSnapshot(snapshot => {
-        snapshot.docChanges().forEach(change => {
-            const id = change.doc.id;
-            const data = change.doc.data();
-            
-            if (change.type === "removed") {
-                delete otherPlayers[id];
-            } else {
-                if (!otherPlayers[id]) {
-                    // INITIALIZE: Add the new equipment slots here!
-                    otherPlayers[id] = { 
-                        ...data, 
-                        equipment: { 
-                            body: new Image(), 
-                            face: new Image(),
-                            board: new Image(), // Added
-                            extra: new Image(), // Added
-                            pet: new Image()    // Added
-                        } 
+    // 1. Join the 'room1' channel
+    const channel = supabase.channel('room1', {
+        config: { presence: { key: player.id } }
+    });
+
+    channel
+        .on('presence', { event: 'sync' }, () => {
+            const state = channel.presenceState();
+            // Convert presence state into our otherPlayers object
+            otherPlayers = {};
+            Object.keys(state).forEach(id => {
+                if (id !== player.id) {
+                    const data = state[id][0];
+                    otherPlayers[id] = {
+                        ...data,
+                        equipment: {
+                            body: new Image(), face: new Image(),
+                            board: new Image(), extra: new Image()
+                        }
                     };
+                    if (data.bodySrc) otherPlayers[id].equipment.body.src = data.bodySrc;
+                    if (data.faceSrc) otherPlayers[id].equipment.face.src = data.faceSrc;
+                    if (data.boardSrc) otherPlayers[id].equipment.board.src = data.boardSrc;
                 }
-                
-                otherPlayers[id].x = data.x;
-                otherPlayers[id].y = data.y;
-                otherPlayers[id].name = data.name;
-                
-                // 1. Sync Shirt/Body
-                if (data.bodySrc && otherPlayers[id].equipment.body.src !== data.bodySrc) {
-                    otherPlayers[id].equipment.body.src = data.bodySrc;
-                }
-                // 2. Sync Hair/Face
-                if (data.faceSrc && otherPlayers[id].equipment.face.src !== data.faceSrc) {
-                    otherPlayers[id].equipment.face.src = data.faceSrc;
-                }
-                
-                // 3. Sync BOARD
-                if (data.boardSrc && otherPlayers[id].equipment.board.src !== data.boardSrc) {
-                    otherPlayers[id].equipment.board.src = data.boardSrc;
-                    otherPlayers[id].equipment.board.onload = () => { otherPlayers[id].equipment.board.complete = true; };
-                } else if (!data.boardSrc) {
-                    otherPlayers[id].equipment.board.src = ""; // Remove board if they unequip
-                }
-
-                // 4. Sync EXTRA (Moodies/Face Acc)
-                if (data.extraSrc && otherPlayers[id].equipment.extra.src !== data.extraSrc) {
-                    otherPlayers[id].equipment.extra.src = data.extraSrc;
-                    otherPlayers[id].equipment.extra.onload = () => { otherPlayers[id].equipment.extra.complete = true; };
-                }
-
-                // 5. Sync PET
-                if (data.petSrc && otherPlayers[id].equipment.pet.src !== data.petSrc) {
-                    otherPlayers[id].equipment.pet.src = data.petSrc;
-                }
+            });
+        })
+        .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                // Broadcast your position immediately
+                await channel.track({
+                    id: player.id,
+                    x: player.x,
+                    y: player.y,
+                    name: player.name,
+                    bodySrc: player.equipment.body.src,
+                    faceSrc: player.equipment.face.src,
+                    boardSrc: player.equipment.board.src
+                });
             }
         });
-    });
-}
 
+    window.gameChannel = channel; // Save for the loop
+}
 // --- 4. INPUT & CLICK DETECTION ---
 mainCanvas.addEventListener('mousedown', (e) => {
     const rect = mainCanvas.getBoundingClientRect();
@@ -260,15 +234,18 @@ function equipBoard(item) {
     };
 }
 // --- 6. GAME LOOP ---
-function loop() {
-    if (!game.active) return;
-    
-    // Smooth Movement
-    player.x += (player.targetX - player.x) * 0.12;
-    player.y += (player.targetY - player.y) * 0.12;
-    game.cameraX = player.x - mainCanvas.width / 2;
-
-    // Sync to Firebase every 30 frames
+// Sync to Supabase Realtime every 60 frames
+if (window.gameChannel && game.frameCount % 60 === 0) {
+    window.gameChannel.track({
+        id: player.id,
+        x: Math.round(player.x),
+        y: Math.round(player.y),
+        name: player.name,
+        bodySrc: player.equipment.body.src || "",
+        faceSrc: player.equipment.face.src || "",
+        boardSrc: player.equipment.board.src || ""
+    });
+}
 if (player.id && game.frameCount % 200 === 0) {
     db.collection("active_players").doc(player.id).set({
         x: Math.round(player.x),
@@ -291,7 +268,7 @@ if (player.id && game.frameCount % 200 === 0) {
 
     game.frameCount++;
     requestAnimationFrame(loop);
-}
+
 function drawPlayer(p) {
     const px = p.x - game.cameraX; 
     const py = p.y; 
@@ -335,8 +312,8 @@ function drawPlayer(p) {
     }
 
     // 6. USERNAME (Don't move it!)
-   const username = p.name || "User";
-    const title = "Golden Girl"; 
+   const username = p.username || "User";
+    const title = "Novice"; 
     ctx.font = "bold 12px 'Tahoma', sans-serif";
 
     // 1. Measure for the oval width

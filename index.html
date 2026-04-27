@@ -6,6 +6,19 @@
     <title>🌸 Dynamic Prism 🌸</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+      // Replace 'YOUR_ANON_PUBLIC_KEY' with the key from your Supabase Dashboard
+      const { createClient } = window.supabase;
+      window.supabase = createClient(
+        'https://wgxszhetpietfjlgeffp.supabase.co', 
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndneHN6aGV0cGlldGZqbGdlZmZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxODUxOTYsImV4cCI6MjA5Mjc2MTE5Nn0.WPfXK-5qPgvnZP2H_eyC55EXpfAf8C7rGLsDwv86Oz0' 
+      );
+    </script>
+
+    <script src="js/auth.js"></script>
 </head>
 <body>
 
@@ -37,7 +50,7 @@
                 </div>
             </div>
 
-            <div id="char-setup" style="display:none; text-align: center; animation: fadeIn 0.5s;">
+            <div id="char-setup" style="display:none; text-align: center;">
                 <h1 style="color: #ff8fb1; font-family: 'Quicksand';">Choose Your Look 🌸</h1>
                 <p style="color: #888; margin-bottom: 30px; font-size: 13px;">This will be your base avatar!</p>
 
@@ -56,6 +69,7 @@
                         <h3>BOY</h3>
                     </div>
                 </div>
+
                 <button onclick="confirmCharacter()" id="enter-btn" class="bubbly-btn" style="width: 250px; display: none;">
                     Confirm & Enter Prism ✨
                 </button>
@@ -63,9 +77,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <script src="auth.js"></script>
 </body>
 </html>

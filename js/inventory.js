@@ -55,6 +55,7 @@ async function filterInv(mainCat) {
 }
 
 // This fetches the actual items from your Firebase "inventory" sub-collection
+// --- 1. Fetch Items from Supabase ---
 async function loadFilteredItems() {
     const itemGrid = document.getElementById('item-grid');
     if (!itemGrid) return;
@@ -62,37 +63,73 @@ async function loadFilteredItems() {
     itemGrid.innerHTML = "Loading...";
 
     try {
-        let query = db.collection("users").doc(player.id).collection("inventory")
-                      .where("type", "==", currentMainCat);
+        // Query the 'Inventory' table in Supabase
+        let query = window.supabase
+            .from('Inventory')
+            .select('*')
+            .eq('user_id', player.id)
+            .eq('type', currentMainCat);
         
         if (currentSubCat) {
-            query = query.where("subType", "==", currentSubCat);
+            query = query.eq('subType', currentSubCat);
         }
 
-        const snapshot = await query.get();
+        const { data: items, error } = await query;
+
         itemGrid.innerHTML = "";
 
-        if (snapshot.empty) {
+        if (error || !items || items.length === 0) {
             itemGrid.innerHTML = `<p style="color:gray; padding:10px;">No items found.</p>`;
             return;
         }
 
-        snapshot.forEach(doc => {
-            const item = doc.data();
+        items.forEach(item => {
             const slot = document.createElement('div');
-            slot.style = "background:white; border:2px solid #79B8E0; border-radius:10px; height:80px; width:80px; display:flex; align-items:center; justify-content:center; cursor:pointer;";
+            slot.className = "inv-item-slot";
+            slot.style = "background:white; border:2px solid #79B8E0; border-radius:10px; height:80px; width:80px; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden;";
             
-            // Inside loadFilteredItems()
-            slot.innerHTML = `<img src="${item.icon}" style="width: 150%; height: 150%; object-fit: cover; object-position: center top; margin-top: 10px;">`;
+            // Icon styling
+            slot.innerHTML = `<img src="${item.icon}" style="height: 120%; width: auto; position: absolute; top: -5px;">`;
 
-            // Your equip function
             slot.onclick = () => equipItem(item);
-            
             itemGrid.appendChild(slot);
         });
     } catch (err) {
         console.error("Inventory Load Error:", err);
     }
+}
+
+// --- 2. Equip and Sync to Supabase ---
+async function equipItem(item) {
+    console.log("Equipping:", item.name);
+
+    // Update Local Player Object
+    if (item.type === 'tops') {
+        player.equipment.body.src = item.src;
+    } else if (item.type === 'hair') {
+        player.equipment.face.src = item.src;
+    } else if (item.type === 'board') {
+        player.equipment.board.src = item.src;
+        player.equipment.board.complete = true;
+    } else if (item.type === 'faceAcc') {
+        player.equipment.extra.src = item.src;
+        player.equipment.extra.complete = true;
+    }
+
+    // Update the 'Users' table in Supabase to save the outfit
+    const { error } = await window.supabase
+        .from('Users')
+        .update({
+            bodySrc: player.equipment.body.src,
+            faceSrc: player.equipment.face.src,
+            boardSrc: player.equipment.board.src,
+            extraSrc: player.equipment.extra.src
+        })
+        .eq('id', player.id);
+
+    if (error) console.error("Error saving outfit:", error);
+    
+    updatePreview();
 }
 function equipItem(item) {
     console.log("Equipping:", item.name, "Type:", item.type);
@@ -139,8 +176,8 @@ function equipItem(item) {
         };
     }
 
-    // Sync to Firebase
-    db.collection("active_players").doc(player.id).update({
+    // Sync to Supabase
+    window.supabase.from()("active_players").doc(player.id).update({
         bodySrc: player.equipment.body.src || "",
         faceSrc: player.equipment.face.src || "",
         boardSrc: player.equipment.board ? player.equipment.board.src : "",
@@ -179,7 +216,7 @@ function updatePreview() {
         pCtx.drawImage(player.equipment.face, 0, 0, 100, 85, (centerX - 45) + 21, drawY - 15, 95, 85);
     }
 }
-db.collection("items").onSnapshot((snapshot) => { 
+window.supabase.from()("items").onSnapshot((snapshot) => { 
     itemGrid.innerHTML = "";
 
     snapshot.forEach(doc => {
